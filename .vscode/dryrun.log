@@ -1,0 +1,17 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/home/mario/Documents/facu/SO/practico1/so22lab1g22'
+gcc `pkg-config --cflags glib-2.0` -MM mybash.c parsing.c strextra.c > .depend
+ 
+Package glib-2.0 was not found in the pkg-config search path.
+Perhaps you should add the directory containing `glib-2.0.pc'
+to the PKG_CONFIG_PATH environment variable
+No package 'glib-2.0' found
+
+gcc -std=gnu11 -Wall -Wextra -Wbad-function-cast -Wstrict-prototypes -Wmissing-declarations -Wmissing-prototypes -Wno-unused-parameter -Werror -Werror=vla -g -pedantic `pkg-config --cflags glib-2.0`  -c -o mybash.o mybash.c
+gcc -std=gnu11 -Wall -Wextra -Wbad-function-cast -Wstrict-prototypes -Wmissing-declarations -Wmissing-prototypes -Wno-unused-parameter -Werror -Werror=vla -g -pedantic `pkg-config --cflags glib-2.0`  -c -o parsing.o parsing.c
+ 
+gcc -std=gnu11 -Wall -Wextra -Wbad-function-cast -Wstrict-prototypes -Wmissing-declarations -Wmissing-prototypes -Wno-unused-parameter -Werror -Werror=vla -g -pedantic `pkg-config --cflags glib-2.0`  -c -o strextra.o strextra.c
+ 
+gcc -std=gnu11 -Wall -Wextra -Wbad-function-cast -Wstrict-prototypes -Wmissing-declarations -Wmissing-prototypes -Wno-unused-parameter -Werror -Werror=vla -g -pedantic -o mybash mybash.o parsing.o strextra.o objects-x86_64/parser.o objects-x86_64/lexer.o `pkg-config --libs glib-2.0`
+make: Leaving directory '/home/mario/Documents/facu/SO/practico1/so22lab1g22'
+ 
