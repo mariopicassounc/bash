@@ -1,3 +1,4 @@
 *.o
 mybash
 .depend
+.vscode

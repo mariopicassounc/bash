@@ -28,7 +28,7 @@
  *
  * La interfaz es esencialmente la de una cola. A eso se le
  * agrega dos accesores/modificadores para redirección de entrada y salida.
- */
+ */ 
 
 typedef struct scommand_s * scommand;
 
