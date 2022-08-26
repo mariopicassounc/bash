@@ -49,6 +49,16 @@ void scommand_pop_front(scommand self){
     assert(self!=NULL && !scommand_is_empty(self));
 }
 
+void scommand_set_redir_in(scommand self, char * filename){
+    assert(self != NULL);
+    self->redirect_in = filename;
+}
+
+void scommand_set_redir_out(scommand self, char * filename){
+    assert(self != NULL);
+    self->redirect_out = filename;
+}
+
 bool scommand_is_empty(const scommand self){
     assert(self!=NULL);
     return (self->command_and_args == NULL) && 
