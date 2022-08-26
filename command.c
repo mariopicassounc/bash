@@ -31,3 +31,13 @@ scommand scommand_destroy(scommand self){
     assert(self == NULL);
     return self;
 }
+
+void scommand_push_back(scommand self, char * argument){
+    assert(self!=NULL && argument!=NULL);
+    g_list_append(self->command_and_args, argument); /*Esto anda si el argumento es un puntero de 64 bits y el gpointer también*/
+    assert(!scommand_is_empty(self));
+}
+
+void scommand_pop_front(scommand self){
+    assert(self!=NULL && !scommand_is_empty(self));
+}
