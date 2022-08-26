@@ -10,7 +10,7 @@ CFLAGS=-std=gnu11 -Wall -Wextra -Wbad-function-cast -Wstrict-prototypes -Wmissin
 LDFLAGS=`pkg-config --libs glib-2.0`
 */
 
-int main(){
+int main(void){
     char *command = "wc";
     char *command2 = "ls";
     scommand self = scommand_new();
@@ -19,3 +19,6 @@ int main(){
     scommand_destroy(self);
     return 0;
 }
+
+// para compilar: gcc -std=gnu11 -Wall -Wextra -Wbad-function-cast -Wstrict-prototypes -Wmissing-declarations -Wmissing-prototypes -Wno-unused-parameter -Werror -Werror=vla -g -pedantic -c main.c command.c $(pkg-config --cflags --libs glib-2.0)
+// gcc -std=gnu11 -Wall -Wextra -Wbad-function-cast -Wstrict-prototypes -Wmissing-declarations -Wmissing-prototypes -Wno-unused-parameter -Werror -Werror=vla -g -pedantic main.o command.o -o test $(pkg-config --cflags --libs glib-2.0)
