@@ -23,3 +23,6 @@ scommand scommand_new(void){
     return result;    
 }
 
+scommand scommand_destroy(scommand self){
+    
+}
