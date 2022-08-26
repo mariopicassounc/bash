@@ -23,3 +23,11 @@ scommand scommand_new(void){
     return result;    
 }
 
+scommand scommand_destroy(scommand self){
+    assert(self != NULL);
+    g_list_free(self->command_and_args);
+    free(self);
+    self = NULL;
+    assert(self == NULL);
+    return self;
+}
