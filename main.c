@@ -13,9 +13,12 @@ LDFLAGS=`pkg-config --libs glib-2.0`
 int main(void){
     char *command = "wc";
     char *command2 = "ls";
-    scommand self = scommand_new();
+    const scommand self = scommand_new();
+    unsigned int zero_len = scommand_length(self);
+    printf("%u",zero_len);
     scommand_push_back(self, command);
     scommand_push_back(self, command2);
+    printf("\n%u\n", scommand_length(self));
     scommand_destroy(self);
     return 0;
 }

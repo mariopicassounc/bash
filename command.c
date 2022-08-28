@@ -28,10 +28,6 @@ scommand scommand_destroy(scommand self){
     assert(self != NULL);
     g_list_free(self->command_and_args);
     self->command_and_args = NULL;
-    free(self->redirect_in);
-    self->redirect_in = NULL;
-    free(self->redirect_out);
-    self->redirect_out=NULL;
     free(self);
     self = NULL;
     assert(self == NULL);
@@ -40,8 +36,7 @@ scommand scommand_destroy(scommand self){
 
 void scommand_push_back(scommand self, char * argument){
     assert(self!=NULL && argument!=NULL);
-    GList *aux = g_list_append(self->command_and_args, argument); /*Esto anda si el argumento es un puntero de 64 bits y el gpointer también*/
-    self->command_and_args = aux;
+    self->command_and_args = g_list_append(self->command_and_args, argument); /*Esto anda si el argumento es un puntero de 64 bits y el gpointer también*/
     assert(!scommand_is_empty(self));
 }
 
@@ -64,6 +59,14 @@ bool scommand_is_empty(const scommand self){
     return (self->command_and_args == NULL) && 
     (self->redirect_in == NULL) &&
     (self->redirect_out == NULL);
+}
+
+unsigned int scommand_length(const scommand self){
+    assert(self!=NULL);
+    unsigned int length;
+    length = g_list_length(self->command_and_args);
+    assert((length==0) == scommand_is_empty(self));
+    return length;
 }
 
 char * scommand_get_redir_in(const scommand self){
