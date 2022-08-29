@@ -50,8 +50,20 @@ void scommand_push_back(scommand self, char * argument){
     assert(!scommand_is_empty(self));
 }
 
+/*Helper Function: g_list_free_front
+* Remove the first element of a non-empty list
+* Requieres: list != NULL
+*/
+static GList* g_list_free_front(GList *list){
+    assert(list != NULL);
+    gpointer first = g_list_nth_data(list,0u);
+    GList* l = g_list_remove(list,first);
+    return l;
+}
+
 void scommand_pop_front(scommand self){
     assert(self!=NULL && !scommand_is_empty(self));
+    self->cmd_args = g_list_free_front(self->cmd_args);
 }
 
 void scommand_set_redir_in(scommand self, char * filename){

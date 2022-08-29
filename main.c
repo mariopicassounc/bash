@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "command.h"
+#include "strextra.h"
 
 /*
 TARGET=mybash
@@ -25,7 +26,10 @@ int main(void){
     scommand_set_redir_out(self, redout);
     char * scmd_str = scommand_to_string(self);
     printf("\n%s\n", scmd_str);
-    
+    scommand_pop_front(self);
+    printf("\n%u\n", scommand_length(self));
+    scmd_str = scommand_to_string(self);
+    printf("\n%s\n", scmd_str);
     free(scmd_str);
     scmd_str= NULL;
     scommand_destroy(self);
@@ -34,4 +38,4 @@ int main(void){
 }
 
 // para compilar: gcc -std=gnu11 -Wall -Wextra -Wbad-function-cast -Wstrict-prototypes -Wmissing-declarations -Wmissing-prototypes -Wno-unused-parameter -Werror -Werror=vla -g -pedantic -c main.c command.c strextra.c $(pkg-config --cflags --libs glib-2.0)
-// gcc -std=gnu11 -Wall -Wextra -Wbad-function-cast -Wstrict-prototypes -Wmissing-declarations -Wmissing-prototypes -Wno-unused-parameter -Werror -Werror=vla -g -pedantic main.o command.o -o test $(pkg-config --cflags --libs glib-2.0)
+// gcc -std=gnu11 -Wall -Wextra -Wbad-function-cast -Wstrict-prototypes -Wmissing-declarations -Wmissing-prototypes -Wno-unused-parameter -Werror -Werror=vla -g -pedantic main.o command.o strextra.o -o test $(pkg-config --cflags --libs glib-2.0)
