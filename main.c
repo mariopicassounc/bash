@@ -16,22 +16,32 @@ int main(void){
     char *command2 = "ls";
     char *redin = "in";
     char *redout = "out";
+    
     const scommand self = scommand_new();
+    
     unsigned int zero_len = scommand_length(self);
     printf("%u",zero_len);
+    
     scommand_push_back(self, command);
     scommand_push_back(self, command2);
     printf("\n%u\n", scommand_length(self));
+    
     scommand_set_redir_in(self, redin);
     scommand_set_redir_out(self, redout);
+    
     char * scmd_str = scommand_to_string(self);
     printf("\n%s\n", scmd_str);
+    
+    free(scmd_str);
+    scmd_str= NULL;
+
     printf("\n%s\n", scommand_front(self));
     scommand_pop_front(self);
     printf("\n%u\n", scommand_length(self));
     scmd_str = scommand_to_string(self);
     printf("\n%s\n", scmd_str);
     printf("\n%s\n", scommand_front(self));
+    
     free(scmd_str);
     scmd_str= NULL;
     scommand_destroy(self);
