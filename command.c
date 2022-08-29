@@ -4,17 +4,24 @@
 #include <stdio.h>
 #include <assert.h>
 
+#include "strextra.h"
 #include "command.h"
 
 struct scommand_s{
-    GList * command_and_args;
+    GList * cmd_args;
     char * redirect_out;
     char * redirect_in;
 };
 
 scommand scommand_new(void){
     scommand result = malloc(sizeof(struct scommand_s));
-    result->command_and_args = NULL;
+
+    if(result== NULL){
+        fprintf(stderr, "invalid allocated memory");
+        exit(EXIT_FAILURE);
+    }
+
+    result->cmd_args = NULL;
     result->redirect_in = NULL;
     result->redirect_out = NULL;
 
@@ -26,17 +33,20 @@ scommand scommand_new(void){
 
 scommand scommand_destroy(scommand self){
     assert(self != NULL);
-    g_list_free(self->command_and_args);
-    self->command_and_args = NULL;
+    
+    g_list_free(self->cmd_args);
+    self->cmd_args = NULL;
+
     free(self);
     self = NULL;
+    
     assert(self == NULL);
     return self;
 }
 
 void scommand_push_back(scommand self, char * argument){
     assert(self!=NULL && argument!=NULL);
-    self->command_and_args = g_list_append(self->command_and_args, argument); /*Esto anda si el argumento es un puntero de 64 bits y el gpointer también*/
+    self->cmd_args = g_list_append(self->cmd_args, argument); /*Esto anda si el argumento es un puntero de 64 bits y el gpointer también*/
     assert(!scommand_is_empty(self));
 }
 
@@ -56,7 +66,7 @@ void scommand_set_redir_out(scommand self, char * filename){
 
 bool scommand_is_empty(const scommand self){
     assert(self!=NULL);
-    return (self->command_and_args == NULL) && 
+    return (self->cmd_args == NULL) && 
     (self->redirect_in == NULL) &&
     (self->redirect_out == NULL);
 }
@@ -64,7 +74,7 @@ bool scommand_is_empty(const scommand self){
 unsigned int scommand_length(const scommand self){
     assert(self!=NULL);
     unsigned int length;
-    length = g_list_length(self->command_and_args);
+    length = g_list_length(self->cmd_args);
     assert((length==0) == scommand_is_empty(self));
     return length;
 }
@@ -77,4 +87,35 @@ char * scommand_get_redir_in(const scommand self){
 char * scommand_get_redir_out(const scommand self){
     assert(self != NULL);
     return self->redirect_out;
+}
+
+char * scommand_to_string(const scommand self){
+    assert(self!=NULL);
+    
+    char * result = strdup("");
+    GList * l = self->cmd_args;
+
+    if(l != NULL){
+        result = strmerge(result, l->data);
+        for(l = g_list_next(l); l != NULL; l = g_list_next(l)){
+            result = strmerge(result, " ");
+            result = strmerge(result, l->data);
+        }
+    }
+
+    if (self->redirect_in != NULL){
+        result = strmerge(result, " < ");
+        result = strmerge(result, self->redirect_in);
+    }
+    
+    if(self->redirect_out != NULL){
+        result = strmerge(result, " > ");
+        result = strmerge(result, self->redirect_out);
+    }
+
+    assert(scommand_is_empty(self) ||
+    scommand_get_redir_in(self)==NULL || scommand_get_redir_out(self)==NULL ||
+    strlen(result)>0);
+    
+    return result;
 }

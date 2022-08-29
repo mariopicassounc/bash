@@ -15,7 +15,7 @@ char * strmerge(char *s1, char *s2);
  *     s1 != NULL &&  s2 != NULL
  *
  * ENSURES:
- *     merge != NULL && strlen(merge) == strlen(s1) + strlen(s2)
+ *     result != NULL && strlen(result) == strlen(s1) + strlen(s2) + 1
  *
  */
 

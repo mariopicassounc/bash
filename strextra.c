@@ -11,6 +11,10 @@ char * strmerge(char *s1, char *s2) {
     merge = calloc(len_s1 + len_s2 + 1, sizeof(char));
     strncpy(merge, s1, len_s1);
     merge = strncat(merge, s2, len_s2);
-    assert(merge != NULL && strlen(merge) == strlen(s1) + strlen(s2));
+    
+    free(s1); //free memory allocated
+    s1 = NULL;
+    
+    assert(merge != NULL && strlen(merge) == len_s1 + len_s2);
     return merge;
 }
