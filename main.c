@@ -26,10 +26,12 @@ int main(void){
     scommand_set_redir_out(self, redout);
     char * scmd_str = scommand_to_string(self);
     printf("\n%s\n", scmd_str);
+    printf("\n%s\n", scommand_front(self));
     scommand_pop_front(self);
     printf("\n%u\n", scommand_length(self));
     scmd_str = scommand_to_string(self);
     printf("\n%s\n", scmd_str);
+    printf("\n%s\n", scommand_front(self));
     free(scmd_str);
     scmd_str= NULL;
     scommand_destroy(self);

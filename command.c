@@ -50,9 +50,9 @@ void scommand_push_back(scommand self, char * argument){
     assert(!scommand_is_empty(self));
 }
 
-/*Helper Function: g_list_free_front
-* Remove the first element of a non-empty list
-* Requieres: list != NULL
+/*Función auxiliar: g_list_free_front
+* Elimina el primer elemento de una función no vacía
+* Requires: list != NULL
 */
 static GList* g_list_free_front(GList *list){
     assert(list != NULL);
@@ -89,6 +89,13 @@ unsigned int scommand_length(const scommand self){
     length = g_list_length(self->cmd_args);
     assert((length==0) == scommand_is_empty(self));
     return length;
+}
+
+char * scommand_front(const scommand self){
+    assert(self!=NULL && !scommand_is_empty(self));
+    char* result = g_list_nth_data(self->cmd_args, 0u);
+    assert(result != NULL);
+    return result;
 }
 
 char * scommand_get_redir_in(const scommand self){
