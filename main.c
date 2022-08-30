@@ -41,11 +41,32 @@ int main(void){
     scmd_str = scommand_to_string(self);
     printf("\n%s\n", scmd_str);
     printf("\n%s\n", scommand_front(self));
-    
+
     free(scmd_str);
     scmd_str= NULL;
-    scommand_destroy(self);
+
+    scommand self1 = scommand_new();
+    scommand_push_back(self1, command);
+    scommand_set_redir_in(self1, redin);
+    scommand_set_redir_out(self1, redout);
+
+    pipeline pipe = pipeline_new();
+    pipeline_push_back(pipe, self);
+    pipeline_push_back(pipe, self1);
+    pipeline_set_wait(pipe, false);    
     
+    char * l = pipeline_to_string(pipe);
+    printf("\n%s\n",l);
+    free(l);
+    l = NULL;
+    pipe = pipeline_destroy(pipe);
+
+
+
+    scommand_destroy(self);
+    scommand_destroy(self1);
+
+
     return 0;
 }
 

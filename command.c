@@ -175,6 +175,7 @@ pipeline pipeline_destroy(pipeline self)
     self->sc = NULL;
 
     free(self);
+    self = NULL;
 
     assert(self == NULL);
     return self;
@@ -200,4 +201,44 @@ void pipeline_set_wait(pipeline self, const bool w)
     self->wait = w;
 }
 
-bool pipeline_is_empty(const pipeline self);
+bool pipeline_is_empty(const pipeline self){
+    return self->sc == NULL;
+}
+
+bool pipeline_get_wait(const pipeline self)
+{
+    assert(self != NULL);
+    return self->wait;
+}
+
+char * pipeline_to_string(const pipeline self){
+    assert(self!=NULL);
+    
+    char * result = strdup("");
+    GList * l = self->sc;
+    char * frst_sc_str = NULL;
+    char * snd_sc_str = NULL;
+
+    if(l != NULL){
+        frst_sc_str = scommand_to_string(l->data);
+        result = strmerge(result, frst_sc_str );
+        free(frst_sc_str);
+
+        for(l = g_list_next(l); l != NULL; l = g_list_next(l)){
+            snd_sc_str = scommand_to_string(l->data);
+            result = strmerge(result, " | ");
+            result = strmerge(result, snd_sc_str);
+            free(snd_sc_str);
+        }
+    }
+
+    if(self->wait){
+        result = strmerge(result, " &");
+    }
+
+    assert(pipeline_is_empty(self) 
+        || pipeline_get_wait(self) 
+        || strlen(result)>0);
+    
+    return result;
+}
