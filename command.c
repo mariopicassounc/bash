@@ -138,3 +138,66 @@ char * scommand_to_string(const scommand self){
     
     return result;
 }
+
+
+/*   ---  pipeline  ---   */
+
+
+typedef struct pipeline_s{
+    GList * sc;
+    bool wait;
+}pipeline_s;
+
+pipeline pipeline_new(void)
+{
+    pipeline result = malloc(sizeof(pipeline_s));
+    if (result==NULL){
+        fprintf(stderr, "invalid allocated memory");
+        exit(EXIT_FAILURE);
+    }
+
+    result->sc = NULL;
+    result->wait = TRUE;
+
+    assert(result != NULL 
+    && pipeline_is_empty(result)
+    && pipeline_get_wait(result));
+
+    return result;
+}
+
+
+pipeline pipeline_destroy(pipeline self)
+{
+    assert(self != NULL);
+    
+    g_list_free(self->sc);
+    self->sc = NULL;
+
+    free(self);
+
+    assert(self == NULL);
+    return self;
+}
+
+void pipeline_push_back(pipeline self, scommand sc)
+{
+    assert(self != NULL && sc != NULL);
+    self->sc = g_list_append(self->sc, sc);
+    assert(!(pipeline_is_empty(self)));
+}
+
+
+void pipeline_pop_front(pipeline self)
+{
+    assert(self != NULL && !pipeline_is_empty(self));
+
+}
+
+void pipeline_set_wait(pipeline self, const bool w)
+{
+    assert(self != NULL);
+    self->wait = w;
+}
+
+bool pipeline_is_empty(const pipeline self);
