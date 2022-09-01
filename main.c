@@ -66,6 +66,8 @@ int main(void){
     free(l);
     l = NULL;
 
+    
+
     pipe = pipeline_destroy(pipe);
     scommand_destroy(self);
     scommand_destroy(self1);
