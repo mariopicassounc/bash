@@ -161,7 +161,7 @@ pipeline pipeline_new(void)
 
     assert(result != NULL 
     && pipeline_is_empty(result)
-    && pipeline_get_wait(result));
+    && pipeline_get_wait(result)); // falta darle otro termino a la funcion (,result->wait) nose si seria lo correcto
 
     return result;
 }
@@ -192,7 +192,8 @@ void pipeline_push_back(pipeline self, scommand sc)
 void pipeline_pop_front(pipeline self)
 {
     assert(self != NULL && !pipeline_is_empty(self));
-
+    //scommand_destroy(g_list_first(self->sc)); error de tipo, nose como tomar el scommand
+    g_list_free_front(self->sc);
 }
 
 void pipeline_set_wait(pipeline self, const bool w)
@@ -203,6 +204,22 @@ void pipeline_set_wait(pipeline self, const bool w)
 
 bool pipeline_is_empty(const pipeline self){
     return self->sc == NULL;
+}
+
+unsigned int pipeline_length(const pipeline self){
+	
+	assert(self!=NULL);
+	unsigned int l;
+	l = g_list_length(self->sc);
+	assert((pipeline_length(self)==0) == pipeline_is_empty(self));
+	return l;
+}
+
+scommand pipeline_front(const pipeline self){
+	
+	assert(self!=NULL && !pipeline_is_empty(self));
+	assert(g_list_first(self->sc) != NULL);
+	//return g_list_first(self->sc); idem a pipeline_pop_front
 }
 
 bool pipeline_get_wait(const pipeline self)
