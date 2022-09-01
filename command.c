@@ -188,12 +188,10 @@ void pipeline_push_back(pipeline self, scommand sc)
     assert(!(pipeline_is_empty(self)));
 }
 
-
 void pipeline_pop_front(pipeline self)
 {
     assert(self != NULL && !pipeline_is_empty(self));
-    //scommand_destroy(g_list_first(self->sc)); error de tipo, nose como tomar el scommand
-    g_list_free_front(self->sc);
+    self->sc = g_list_free_front(self->sc);
 }
 
 void pipeline_set_wait(pipeline self, const bool w)
@@ -218,8 +216,9 @@ unsigned int pipeline_length(const pipeline self){
 scommand pipeline_front(const pipeline self){
 	
 	assert(self!=NULL && !pipeline_is_empty(self));
-	assert(g_list_first(self->sc) != NULL);
-	//return g_list_first(self->sc); idem a pipeline_pop_front
+	scommand result = g_list_nth_data(self->sc,0u);
+    assert(result!=NULL);
+    return result;
 }
 
 bool pipeline_get_wait(const pipeline self)

@@ -59,10 +59,14 @@ int main(void){
     printf("\n%s\n",l);
     free(l);
     l = NULL;
+
+    pipeline_pop_front(pipe);
+    l = pipeline_to_string(pipe);
+    printf("\n%s\n",l);
+    free(l);
+    l = NULL;
+
     pipe = pipeline_destroy(pipe);
-
-
-
     scommand_destroy(self);
     scommand_destroy(self1);
 
