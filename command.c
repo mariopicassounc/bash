@@ -144,7 +144,7 @@ char * scommand_to_string(const scommand self){
 
 
 typedef struct pipeline_s{
-    GList * sc;
+    GList * list_sc;
     bool wait;
 }pipeline_s;
 
@@ -156,7 +156,7 @@ pipeline pipeline_new(void)
         exit(EXIT_FAILURE);
     }
 
-    result->sc = NULL;
+    result->list_sc = NULL;
     result->wait = TRUE;
 
     assert(result != NULL 
@@ -171,8 +171,8 @@ pipeline pipeline_destroy(pipeline self)
 {
     assert(self != NULL);
     
-    g_list_free(self->sc);
-    self->sc = NULL;
+    g_list_free(self->list_sc);
+    self->list_sc = NULL;
 
     free(self);
     self = NULL;
@@ -184,14 +184,14 @@ pipeline pipeline_destroy(pipeline self)
 void pipeline_push_back(pipeline self, scommand sc)
 {
     assert(self != NULL && sc != NULL);
-    self->sc = g_list_append(self->sc, sc);
+    self->list_sc = g_list_append(self->list_sc, sc);
     assert(!(pipeline_is_empty(self)));
 }
 
 void pipeline_pop_front(pipeline self)
 {
     assert(self != NULL && !pipeline_is_empty(self));
-    self->sc = g_list_free_front(self->sc);
+    self->list_sc = g_list_free_front(self->list_sc);
 }
 
 void pipeline_set_wait(pipeline self, const bool w)
@@ -201,22 +201,23 @@ void pipeline_set_wait(pipeline self, const bool w)
 }
 
 bool pipeline_is_empty(const pipeline self){
-    return self->sc == NULL;
+    assert(self != NULL);
+    return (g_list_length(self->list_sc) == 0) || self == NULL;
 }
 
 unsigned int pipeline_length(const pipeline self){
 	
 	assert(self!=NULL);
 	unsigned int l;
-	l = g_list_length(self->sc);
-	assert((pipeline_length(self)==0) == pipeline_is_empty(self));
+	l = g_list_length(self->list_sc);
+	assert((l == 0) == pipeline_is_empty(self));
 	return l;
 }
 
 scommand pipeline_front(const pipeline self){
 	
 	assert(self!=NULL && !pipeline_is_empty(self));
-	scommand result = g_list_nth_data(self->sc,0u);
+	scommand result = g_list_nth_data(self->list_sc,0u);
     assert(result!=NULL);
     return result;
 }
@@ -231,7 +232,7 @@ char * pipeline_to_string(const pipeline self){
     assert(self!=NULL);
     
     char * result = strdup("");
-    GList * l = self->sc;
+    GList * l = self->list_sc;
     char * frst_sc_str = NULL;
     char * snd_sc_str = NULL;
 
@@ -248,7 +249,7 @@ char * pipeline_to_string(const pipeline self){
         }
     }
 
-    if(self->wait){
+    if(!(self->wait)){
         result = strmerge(result, " &");
     }
 
