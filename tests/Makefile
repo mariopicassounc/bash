@@ -1,14 +1,15 @@
 # La forma normal de usar este Makefile debería ser correr
 # "make test" EN EL DIRECTORIO DE ARRIBA, no en este.
-CPPFLAGS+= -I..
-LDFLAGS+= `pkg-config --libs check`
+CPPFLAGS=`pkg-config --cflags glib-2.0`
+LDFLAGS+= `pkg-config --libs check glib-2.0`
 
 TARGETS=runner runner-command runner-parsing leaktest
 SOURCES=$(shell echo *.c)
+ARCHDIR=objects-$(shell uname -m)
 
 # Modulos que ya se compilaron
 COMMON_OBJECTS=../command.o ../strextra.o
-PARSER_OBJECTS=../parser.o ../lexer.o ../parsing.o
+PARSER_OBJECTS=../$(ARCHDIR)/parser.o ../$(ARCHDIR)/lexer.o ../parsing.o
 
 # Al modulo ejecutor lo recompilamos en este directorio usando mocks
 MOCK_OBJECTS=builtin.o execute.o syscall_mock.o

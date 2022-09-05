@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
+#include <assert.h>
 
 #include "parsing.h"
 #include "parser.h"
@@ -7,34 +8,65 @@
 
 static scommand parse_scommand(Parser p) {
     /* Devuelve NULL cuando hay un error de parseo */
-    return NULL;
+    scommand cmd;
+    arg_kind_t arg_type;
+    char * arg = NULL;
+
+    cmd = scommand_new();
+    arg = parser_next_argument(p, &arg_type);
+    
+    // Check if the input is empty or unexpected syntax
+    // Mutually exclusive condition with the while coniditon
+    if (arg == NULL){
+        scommand_destroy(cmd);
+        cmd = NULL;
+    }
+
+    while (arg != NULL){
+        if (arg_type == ARG_INPUT){
+            scommand_set_redir_in(cmd, arg);
+        }
+        else if (arg_type == ARG_OUTPUT){
+            scommand_set_redir_out(cmd, arg);
+        }
+        else if (arg_type == ARG_NORMAL){
+            scommand_push_back(cmd, arg);
+        }
+        arg = parser_next_argument(p, &arg_type);
+    }
+
+    
+    return cmd;
 }
 
 pipeline parse_pipeline(Parser p) {
+    assert(p != NULL && !parser_at_eof(p));
+
     pipeline result = pipeline_new();
     scommand cmd = NULL;
-    bool error = false, another_pipe=true;
+    bool error = false, another_pipe = true, op_background = false, garbage = false;
 
     cmd = parse_scommand(p);
     error = (cmd==NULL); /* Comando inválido al empezar */
+    
     while (another_pipe && !error) {
-        /*
-         * COMPLETAR
-         *
-         */
+        pipeline_push_back(result, cmd);
+        parser_op_pipe(p, &another_pipe);
     }
-    /* Opcionalmente un OP_BACKGROUND al final */
+    parser_op_background(p, &op_background);
+
+    if(op_background){
+        pipeline_set_wait(result, op_background);
     }
-    /*
-     *
-     * COMPLETAR
-     *
-     */
+    
+    parser_garbage(p, &garbage);
+    
+    // Check if there is invalid characters after &  
+    if ((op_background && garbage) || error){
+        pipeline_destroy(result);
+        result = NULL;
+    }
 
-    /* Tolerancia a espacios posteriores */
-    /* Consumir todo lo que hay inclusive el \n */
-    /* Si hubo error, hacemos cleanup */
-
-    return NULL; // MODIFICAR
+    return result;
 }
 

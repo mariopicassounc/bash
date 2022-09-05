@@ -41,7 +41,7 @@ char * parser_next_argument(Parser parser, arg_kind_t *arg_type);
  * Procesa el próximo argumento e indica si corresponde a un argumento normal, o
  * si es una redirección de entrada/salida. Si se encuentra un símbolo del
  * operador pipe (|) o un fin de línea (\n), el procesamiento no avanza, dejando
- * sin consumir dichos símbolos.
+ * sin consumir dichos símbolos yyyyyy devolviendo NULL.
  * 
  * EJEMPLO:
  *

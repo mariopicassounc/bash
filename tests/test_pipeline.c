@@ -6,7 +6,7 @@
 #include <string.h> /* para strcmp */
 #include <stdlib.h> /* para calloc */
 #include <stdio.h> /* para sprintf */
-#include "command.h"
+#include "../command.h"
 
 #define MAX_LENGTH 257 /* no hay nada como un primo para molestar */
 

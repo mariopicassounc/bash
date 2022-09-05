@@ -25,10 +25,8 @@ int main(int argc, char *argv[]) {
 
         /* Hay que salir luego de ejecutar? */
         quit = parser_at_eof(input);
-        /*
-         * COMPLETAR
-         *
-         */
+        
+        printf("\n%s\n", pipeline_to_string(pipe));
     }
     parser_destroy(input); input = NULL;
     return EXIT_SUCCESS;

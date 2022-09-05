@@ -4,3 +4,5 @@ mybash
 .vscode
 test
 test.out
+runner-parsing
+test.log
