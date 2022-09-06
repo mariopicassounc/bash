@@ -52,11 +52,15 @@ pipeline parse_pipeline(Parser p) {
     while (another_pipe && !error) {
         pipeline_push_back(result, cmd);
         parser_op_pipe(p, &another_pipe);
+        if (another_pipe){
+            cmd = parse_scommand(p);
+            error = (cmd==NULL);
+        }
     }
     parser_op_background(p, &op_background);
 
     if(op_background){
-        pipeline_set_wait(result, op_background);
+        pipeline_set_wait(result, !op_background);
     }
     
     parser_garbage(p, &garbage);

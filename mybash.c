@@ -26,9 +26,13 @@ int main(int argc, char *argv[]) {
         /* Hay que salir luego de ejecutar? */
         quit = parser_at_eof(input);
         
-        printf("\n%s\n", pipeline_to_string(pipe));
+        char * pipe_str = pipeline_to_string(pipe);
+        printf("%s\n", pipe_str);
+        free(pipe_str); pipe_str = NULL;
     }
     parser_destroy(input); input = NULL;
+    pipeline_destroy(pipe); pipe = NULL;
+
     return EXIT_SUCCESS;
 }
 
