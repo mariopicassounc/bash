@@ -6,5 +6,6 @@ test
 test.out
 runner-parsing
 runner-command
+runner
 test.log
 leaktest

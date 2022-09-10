@@ -1,6 +1,9 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
+
+#include "tests/syscall_mock.h"
 
 #include "execute.h"
 #include "command.h"
