@@ -28,7 +28,7 @@ scommand scommand_new(void){
     assert(result != NULL && scommand_is_empty(result) && 
     scommand_get_redir_in (result) == NULL &&
     scommand_get_redir_out (result) == NULL);
-    return result;    
+    return result;
 }
 
 scommand scommand_destroy(scommand self){
