@@ -8,7 +8,7 @@
 #include "command.h"
 
 struct scommand_s{
-    GList * cmd_args;
+    GSList * cmd_args;
     char * redirect_out;
     char * redirect_in;
 };
@@ -17,7 +17,7 @@ scommand scommand_new(void){
     scommand result = malloc(sizeof(struct scommand_s));
 
     if(result== NULL){
-        fprintf(stderr, "invalid allocated memory");
+        fprintf(stderr, "Invalid allocated memory");
         exit(EXIT_FAILURE);
     }
 
@@ -34,8 +34,14 @@ scommand scommand_new(void){
 scommand scommand_destroy(scommand self){
     assert(self != NULL);
     
-    g_list_free(self->cmd_args);
+    /* This funtion pass as a argument the function to free all the elements of the list */
+    g_slist_free_full(self->cmd_args, free);
     self->cmd_args = NULL;
+
+    free(self->redirect_in);
+    self->redirect_in = NULL;
+    free(self->redirect_out);
+    self->redirect_out = NULL;
 
     free(self);
     self = NULL;
@@ -46,33 +52,40 @@ scommand scommand_destroy(scommand self){
 
 void scommand_push_back(scommand self, char * argument){
     assert(self!=NULL && argument!=NULL);
-    self->cmd_args = g_list_append(self->cmd_args, argument); /*Esto anda si el argumento es un puntero de 64 bits y el gpointer también*/
+    self->cmd_args = g_slist_append(self->cmd_args, argument); /*Esto anda si el argumento es un puntero de 64 bits y el gpointer también*/
     assert(!scommand_is_empty(self));
-}
-
-/*Función auxiliar: g_list_free_front
-* Elimina el primer elemento de una función no vacía
-* Requires: list != NULL
-*/
-static GList* g_list_free_front(GList *list){
-    assert(list != NULL);
-    gpointer first = g_list_nth_data(list,0u);
-    GList* l = g_list_remove(list,first);
-    return l;
 }
 
 void scommand_pop_front(scommand self){
     assert(self!=NULL && !scommand_is_empty(self));
-    self->cmd_args = g_list_free_front(self->cmd_args);
+    
+    GSList * head = self->cmd_args;
+    self->cmd_args = g_slist_remove_link(self->cmd_args, head);
+
+    free(head->data);
+    head->data = NULL;
+
+    g_slist_free_1(head);
 }
 
 void scommand_set_redir_in(scommand self, char * filename){
     assert(self != NULL);
+    
+    /* Free past redirectors dynamic string */
+    if(self->redirect_in){
+        free(self->redirect_in);
+    }
+
     self->redirect_in = filename;
 }
 
 void scommand_set_redir_out(scommand self, char * filename){
     assert(self != NULL);
+
+    if(self->redirect_out){
+        free(self->redirect_out);
+    }
+
     self->redirect_out = filename;
 }
 
@@ -86,14 +99,14 @@ bool scommand_is_empty(const scommand self){
 unsigned int scommand_length(const scommand self){
     assert(self!=NULL);
     unsigned int length;
-    length = g_list_length(self->cmd_args);
+    length = g_slist_length(self->cmd_args);
     assert((length==0) == scommand_is_empty(self));
     return length;
 }
 
 char * scommand_front(const scommand self){
     assert(self!=NULL && !scommand_is_empty(self));
-    char* result = g_list_nth_data(self->cmd_args, 0u);
+    char* result = g_slist_nth_data(self->cmd_args, 0u);
     assert(result != NULL);
     return result;
 }
@@ -112,11 +125,11 @@ char * scommand_to_string(const scommand self){
     assert(self!=NULL);
     
     char * result = strdup("");
-    GList * l = self->cmd_args;
+    GSList * l = self->cmd_args;
 
     if(l != NULL){
         result = strmerge(result, l->data);
-        for(l = g_list_next(l); l != NULL; l = g_list_next(l)){
+        for(l = g_slist_next(l); l != NULL; l = g_slist_next(l)){
             result = strmerge(result, " ");
             result = strmerge(result, l->data);
         }
@@ -144,7 +157,7 @@ char * scommand_to_string(const scommand self){
 
 
 typedef struct pipeline_s{
-    GList * list_sc;
+    GSList * list_sc;
     bool wait;
 }pipeline_s;
 
@@ -161,7 +174,7 @@ pipeline pipeline_new(void)
 
     assert(result != NULL 
     && pipeline_is_empty(result)
-    && pipeline_get_wait(result)); // falta darle otro termino a la funcion (,result->wait) nose si seria lo correcto
+    && pipeline_get_wait(result));
 
     return result;
 }
@@ -171,7 +184,11 @@ pipeline pipeline_destroy(pipeline self)
 {
     assert(self != NULL);
     
-    g_list_free(self->list_sc);
+    for(GSList * l = self->list_sc; l != NULL; l = g_slist_next(l)){
+        l->data = scommand_destroy(l->data);
+    }
+
+    g_slist_free(self->list_sc);
     self->list_sc = NULL;
 
     free(self);
@@ -184,14 +201,20 @@ pipeline pipeline_destroy(pipeline self)
 void pipeline_push_back(pipeline self, scommand sc)
 {
     assert(self != NULL && sc != NULL);
-    self->list_sc = g_list_append(self->list_sc, sc);
+    self->list_sc = g_slist_append(self->list_sc, sc);
     assert(!(pipeline_is_empty(self)));
 }
 
 void pipeline_pop_front(pipeline self)
 {
     assert(self != NULL && !pipeline_is_empty(self));
-    self->list_sc = g_list_free_front(self->list_sc);
+    GSList *head = self->list_sc;
+    self->list_sc = g_slist_remove_link(self->list_sc, head);
+
+    head->data = scommand_destroy(head->data);
+    head->next = NULL;
+
+    g_slist_free_1(head);
 }
 
 void pipeline_set_wait(pipeline self, const bool w)
@@ -202,14 +225,14 @@ void pipeline_set_wait(pipeline self, const bool w)
 
 bool pipeline_is_empty(const pipeline self){
     assert(self != NULL);
-    return (g_list_length(self->list_sc) == 0) || self == NULL;
+    return (g_slist_length(self->list_sc) == 0) || self == NULL;
 }
 
 unsigned int pipeline_length(const pipeline self){
 	
 	assert(self!=NULL);
 	unsigned int l;
-	l = g_list_length(self->list_sc);
+	l = g_slist_length(self->list_sc);
 	assert((l == 0) == pipeline_is_empty(self));
 	return l;
 }
@@ -217,7 +240,7 @@ unsigned int pipeline_length(const pipeline self){
 scommand pipeline_front(const pipeline self){
 	
 	assert(self!=NULL && !pipeline_is_empty(self));
-	scommand result = g_list_nth_data(self->list_sc,0u);
+	scommand result = g_slist_nth_data(self->list_sc,0u);
     assert(result!=NULL);
     return result;
 }
@@ -232,7 +255,7 @@ char * pipeline_to_string(const pipeline self){
     assert(self!=NULL);
     
     char * result = strdup("");
-    GList * l = self->list_sc;
+    GSList * l = self->list_sc;
     char * frst_sc_str = NULL;
     char * snd_sc_str = NULL;
 
@@ -241,7 +264,7 @@ char * pipeline_to_string(const pipeline self){
         result = strmerge(result, frst_sc_str );
         free(frst_sc_str);
 
-        for(l = g_list_next(l); l != NULL; l = g_list_next(l)){
+        for(l = g_slist_next(l); l != NULL; l = g_slist_next(l)){
             snd_sc_str = scommand_to_string(l->data);
             result = strmerge(result, " | ");
             result = strmerge(result, snd_sc_str);
