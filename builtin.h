@@ -5,6 +5,7 @@
 
 #include "command.h"
 
+bool exit_bash; //Variable auxiliar que se utilizará para entrar/salir del bash
 bool builtin_is_internal(scommand cmd);
 /*
  * Indica si el comando alojado en `cmd` es un comando interno

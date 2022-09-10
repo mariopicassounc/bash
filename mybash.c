@@ -16,10 +16,10 @@ static void show_prompt(void) {
 int main(int argc, char *argv[]) {
     pipeline pipe;
     Parser input;
-    bool quit = false;
+    exit_bash = false;
 
     input = parser_new(stdin);
-    while (!quit) {
+    while (!exit_bash) {
         show_prompt();
         pipe = parse_pipeline(input);
 
