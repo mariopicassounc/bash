@@ -7,10 +7,6 @@
 
 #include "command.h"
 
-void execute_scommand(pipeline apipe, scommand cmd);
-/*
-Ejecuta un comando simple identificando si es interno o no
-*/
 void execute_pipeline(pipeline apipe);
 /*
  * Ejecuta un pipeline, identificando comandos internos, forkeando, y

@@ -25,10 +25,7 @@ int main(int argc, char *argv[]) {
         pipe = parse_pipeline(input);
 
         /* Chequeamos que se haya parseado la completitud del comando */
-        if(!parser_at_eof(input)){
-            fprintf(stderr, "Error parsing command");
-            exit(EXIT_FAILURE);
-        }
+        exit_bash = parser_at_eof(input);
 
         /* Imprimo el comando. Esto despues se borra */    
         char * pipe_str = pipeline_to_string(pipe);

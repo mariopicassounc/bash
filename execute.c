@@ -14,37 +14,39 @@
 #define READ_END    0    /* index pipe extremo lectura */
 #define WRITE_END   1    /* index pipe extremo escritura */
 
-void execute_scommand(pipeline apipe, scommand cmd){
+/*
+Ejecuta un comando simple identificando si es interno o no
+*/
+static void execute_scommand(pipeline apipe){
 
-    //es comando interno
+    scommand cmd = pipeline_front(apipe);
+    
+    // Es comando interno
     if(builtin_is_internal(cmd)){
-        if (pipeline_get_wait(apipe)){	//no contiene &
-            builtin_run(cmd);
-            wait(NULL);
-        }
-        else if (!pipeline_get_wait(apipe)){ //contiene &
-            builtin_run(cmd);
-        }  
+        builtin_run(cmd); 
     }
-    //No es comando interno
+    
+    // No es comando interno
     else{
-        int pid = fork();
         char **argv = scommand_to_vector(cmd);
 
-        if(pid < 0){	//No funcionó bien el fork
-        fprintf(stderr, "Error fork.");
-            exit(EXIT_FAILURE);			
+        int pid = fork();
+        if (pid < 0){	// No funcionó bien el fork
+            fprintf(stderr, "Error fork.");
+            exit(EXIT_FAILURE);	
         }
         else if(pid == 0){	//Ejecuta el hijo
             execvp(argv[0],argv);
         }
         else if(pid > 0 && pipeline_get_wait(apipe)){ //Proc padre. No contiene &, debe esperar al hijo
-                wait(NULL);
+            wait(NULL);
         }
 
-        pipeline_pop_front(apipe); //paso al siguiente comando
-
-        /*Liberar memoria de **argv*/
+        /* Liberar memoria de **argv */
+        for (int i = 0; argv[i] != NULL; i++){
+            free(argv[i]);
+        }
+        free(argv);
     }
 }
 
@@ -53,9 +55,10 @@ void execute_pipeline(pipeline apipe){
     assert(apipe != NULL);
     
     if(pipeline_length(apipe) == 1){
-        scommand cmd = pipeline_front(apipe);
-        execute_scommand(apipe, cmd);
+        execute_scommand(apipe);
     }
+
+
     else if(pipeline_length(apipe) == 2){
 
         scommand cmd1 = pipeline_front(apipe);  //1er comando
@@ -72,7 +75,7 @@ void execute_pipeline(pipeline apipe){
 
             pipeline_pop_front(apipe);
             cmd2 = pipeline_front(apipe);
-            execute_scommand(apipe, cmd2);
+            execute_scommand(apipe);
             /*
             Pruebas en shell ejecutan sólo el segundo comando si hay un internal en el pipe
             */

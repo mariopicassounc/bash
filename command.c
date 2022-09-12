@@ -153,13 +153,13 @@ char * scommand_to_string(const scommand self){
     return result;
 }
 
-char* scommand_front_and_pop(scommand self) {
+char * scommand_front_and_pop(scommand self){
     assert(self != NULL && !scommand_is_empty(self));
 
-    GSList* node = self->cmd_args;
-    char* result = g_slist_nth_data(node, 0u);
+    char* result = g_slist_nth_data(self->cmd_args, 0u);
 
-    node = g_slist_remove(node, result);
+    self->cmd_args = g_slist_remove(self->cmd_args, result);
+    // g_slist_remove libera el nodo, pero no el elemento
 
     assert(result != NULL);
     return (result);

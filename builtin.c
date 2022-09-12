@@ -32,7 +32,8 @@ bool builtin_alone(pipeline p){
 */
 static void builtin_run_cd (scommand cmd){
     assert(cmd != NULL && strcmp(scommand_front(cmd), "cd") == 0);
-    char* cmd_path = getenv(scommand_front(cmd));
+    scommand_pop_front(cmd);
+    const char* cmd_path = scommand_front(cmd);
     int result = chdir(cmd_path);
     if(result != 0){
         fprintf(stderr, "invalid result");
