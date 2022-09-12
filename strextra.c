@@ -12,7 +12,7 @@ char * strmerge(char *s1, char *s2) {
     strncpy(merge, s1, len_s1);
     merge = strncat(merge, s2, len_s2);
     
-    free(s1); //free memory allocated
+    free(s1); //Libera la memoria
     s1 = NULL;
     
     assert(merge != NULL && strlen(merge) == len_s1 + len_s2);

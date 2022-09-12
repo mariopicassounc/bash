@@ -15,8 +15,8 @@ static scommand parse_scommand(Parser p) {
     cmd = scommand_new();
     arg = parser_next_argument(p, &arg_type);
     
-    // Check if the input is empty or unexpected syntax
-    // Mutually exclusive condition with the while coniditon
+    // Chequea si el input está vacío o es inválido
+    // Condición mutuamente excluyente con la condición del while
     if (arg == NULL){
         scommand_destroy(cmd);
         cmd = NULL;
@@ -65,7 +65,7 @@ pipeline parse_pipeline(Parser p) {
     
     parser_garbage(p, &garbage);
     
-    // Check if there is invalid characters after &  
+    // Chequea si hay caracteres inválidos luego de & 
     if ((op_background && garbage) || error){
         pipeline_destroy(result);
         result = NULL;
