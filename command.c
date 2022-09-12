@@ -34,8 +34,7 @@ scommand scommand_new(void){
 scommand scommand_destroy(scommand self){
     assert(self != NULL);
     
-    /* A esta función se le pasa como argumento otra función que se encarga 
-       de liberar todos los elementos de la lista */
+    /* This funtion pass as a argument the function to free all the elements of the list */
     g_slist_free_full(self->cmd_args, free);
     self->cmd_args = NULL;
 
@@ -72,7 +71,7 @@ void scommand_pop_front(scommand self){
 void scommand_set_redir_in(scommand self, char * filename){
     assert(self != NULL);
     
-    /*Libera las redirecciones pasadas anteriormente*/
+    /* Free past redirectors dynamic string */
     if(self->redirect_in){
         free(self->redirect_in);
     }
@@ -153,17 +152,23 @@ char * scommand_to_string(const scommand self){
     return result;
 }
 
-char* scommand_front_and_pop(scommand self) {
+/* 
+Funciones auxiliares 
+*/
+
+
+char* scommand_front_and_pop(scommand self){
     assert(self != NULL && !scommand_is_empty(self));
 
-    GSList* node = self->cmd_args;
-    char* result = g_slist_nth_data(node, 0u);
+    char* result = g_slist_nth_data(self->cmd_args, 0u);
 
-    node = g_slist_remove(node, result);
+    self->cmd_args = g_slist_remove(self->cmd_args, result);
 
     assert(result != NULL);
     return (result);
 }
+
+
 
 char ** scommand_to_vector(scommand self){ 
     assert(!scommand_is_empty(self));
