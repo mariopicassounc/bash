@@ -8,6 +8,8 @@
 #include "command.h"
 #include "strextra.h"
 
+bool exit_bash;
+
 bool builtin_is_internal(scommand cmd){
     assert(cmd != NULL);
     return strcmp(scommand_front(cmd), "cd") == 0 ||
