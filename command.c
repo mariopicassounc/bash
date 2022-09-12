@@ -152,6 +152,47 @@ char * scommand_to_string(const scommand self){
     return result;
 }
 
+/* Funciones auxiliares */
+
+
+/*
+Obtiene el primer elemento del scommand y elimina el nodo del TAD pero 
+no elimina el string en memoria dinámica
+*/
+char* scommand_front_and_pop(scommand self) {
+    assert(self != NULL && !scommand_is_empty(self));
+
+    GSList* node = self->cmd_args;
+    char* result = g_slist_nth_data(node, 0u);
+
+    node = g_slist_remove(node, result);
+
+    assert(result != NULL);
+    return (result);
+}
+
+
+//Crea un vector cuyos elementos son el comando y los argumentos de un scommand
+char ** scommand_to_vector(scommand self){ 
+    assert(!scommand_is_empty(self));
+    
+    int n = scommand_length(self);
+    char **vector = calloc(sizeof(char*), n+1); 
+
+    if(vector == NULL){
+        fprintf(stderr, "Invalid allocated memory");
+        exit(EXIT_FAILURE);
+    }
+
+    for(int i = 0; i < n; i++){
+        vector[i] = scommand_pop_and_front(self);
+        
+        assert(vector[i] != NULL);  
+    }
+    vector[n] = NULL;
+
+    return vector;
+}
 
 /*   ---  pipeline  ---   */
 
