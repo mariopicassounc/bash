@@ -152,13 +152,11 @@ char * scommand_to_string(const scommand self){
     return result;
 }
 
-/* Funciones auxiliares */
-
-
-/*
-Obtiene el primer elemento del scommand y elimina el nodo del TAD pero 
-no elimina el string en memoria dinámica
+/* 
+Funciones auxiliares 
 */
+
+
 char* scommand_front_and_pop(scommand self) {
     assert(self != NULL && !scommand_is_empty(self));
 
@@ -172,7 +170,7 @@ char* scommand_front_and_pop(scommand self) {
 }
 
 
-//Crea un vector cuyos elementos son el comando y los argumentos de un scommand
+
 char ** scommand_to_vector(scommand self){ 
     assert(!scommand_is_empty(self));
     
@@ -185,7 +183,8 @@ char ** scommand_to_vector(scommand self){
     }
 
     for(int i = 0; i < n; i++){
-        vector[i] = scommand_pop_and_front(self);
+        char *elem = scommand_front_and_pop(self); 
+        vector[i] = elem;
         
         assert(vector[i] != NULL);  
     }
