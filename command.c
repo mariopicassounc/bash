@@ -153,9 +153,16 @@ char * scommand_to_string(const scommand self){
 }
 
 /* 
-Funciones auxiliares 
+* Funciones auxiliares 
 */
 
+/* 
+* Se encarga de eliminar el nodo en el TAD,
+* pero no elimina el string en memoria dinámica
+* 
+* Requires: assert(self != NULL && !scommand_is_empty(self));
+* Ensures: assert(result != NULL);
+*/
 
 char* scommand_front_and_pop(scommand self) {
     assert(self != NULL && !scommand_is_empty(self));
@@ -169,7 +176,14 @@ char* scommand_front_and_pop(scommand self) {
     return (result);
 }
 
-
+/* 
+* Se encarga de guardar en un array de memoria dinámica 
+* los argumentos contenidos en el TAD,
+* a su vez eliminando los nodos utilizando scommand_front_and_pop
+* 
+* Requires: assert(!scommand_is_empty(self));
+* 
+*/
 
 char ** scommand_to_vector(scommand self){ 
     assert(!scommand_is_empty(self));

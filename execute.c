@@ -18,17 +18,16 @@ void execute_scommand(pipeline apipe, scommand cmd){
 
     //es comando interno
     if(builtin_is_internal(cmd)){
-        if (!pipeline_get_wait(apipe)){	//no contiene &
+        if (pipeline_get_wait(apipe)){	//no contiene &
             builtin_run(cmd);
             wait(NULL);
         }
-        else if (pipeline_get_wait(apipe)){ //contiene &
+        else if (!pipeline_get_wait(apipe)){ //contiene &
             builtin_run(cmd);
         }  
     }
     //No es comando interno
-    else if (!builtin_is_internal(cmd)){
-        
+    else{
         int pid = fork();
         char **argv = scommand_to_vector(cmd);
 
@@ -48,6 +47,7 @@ void execute_scommand(pipeline apipe, scommand cmd){
         /*Liberar memoria de **argv*/
     }
 }
+
 void execute_pipeline(pipeline apipe){
     
     assert(apipe != NULL);
@@ -62,11 +62,11 @@ void execute_pipeline(pipeline apipe){
         scommand cmd2 = NULL;                   //2do comando 
         
         if(builtin_is_internal(cmd1)){
-            if (!pipeline_get_wait(apipe)){	//no contiene &
+            if (pipeline_get_wait(apipe)){	//no contiene &
                 builtin_run(cmd1);
                 wait(NULL);
             }
-            else if (pipeline_get_wait(apipe)){ //contiene &
+            else if (!pipeline_get_wait(apipe)){ //contiene &
                 builtin_run(cmd1);
             }
 
