@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
-
+#include <fcntl.h>
 #include "tests/syscall_mock.h"
 
 #include "execute.h"
@@ -15,6 +15,61 @@
 #define WRITE_END 1 /* index pipe extremo escritura */
 
 /* Funciones auxiliares */
+static int set_fd_in(scommand cmd){
+
+    int redirected_in = 0;
+    if(scommand_get_redir_in(cmd) != NULL){
+
+        int file_to_redirect_in = open(scommand_get_redir_in(cmd), O_RDONLY);
+        if (file_to_redirect_in == -1) {
+            // En caso de error, open seetea el mansaje de perror
+            perror(scommand_get_redir_in(cmd));
+            return (EXIT_FAILURE);
+        }
+        
+        redirected_in = dup2(file_to_redirect_in, STDIN_FILENO);
+        if(redirected_in == -1){
+            perror(scommand_get_redir_in(cmd));
+            return(EXIT_FAILURE);
+        }
+
+        int close_file = close(file_to_redirect_in);
+        if(close_file == -1){
+            perror("dup2");
+            return(EXIT_FAILURE);
+        }
+    }
+    //Si redirected_in == 0 -> No hay redirección de entrada
+    return (EXIT_SUCCESS);
+}
+
+static int set_fd_out(scommand cmd){
+
+    int redirected_out = 0;
+    if(scommand_get_redir_out(cmd) != NULL){
+        //O_CREAT para crear el archivo de salida si este no existe
+        int file_to_redirect_out = open(scommand_get_redir_out(cmd), O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR);
+        if (file_to_redirect_out == -1) {
+            // En caso de error, open seetea el mansaje de perror
+            perror(scommand_get_redir_in(cmd));
+            return (EXIT_FAILURE);
+        }
+        
+        redirected_out = dup2(file_to_redirect_out, STDOUT_FILENO);
+        if(redirected_out == -1){
+            perror(scommand_get_redir_in(cmd));
+            return(EXIT_FAILURE);
+        }
+
+        int close_file = close(file_to_redirect_out);
+        if(close_file == -1){
+            perror("dup2");
+            return(EXIT_FAILURE);
+        }
+    }
+    //Si redirected_out == 0 -> No hay redirección de salida
+    return (EXIT_SUCCESS);
+}
 
 /* Liberar memoria de argv */
 static void free_argv(char **argv)
