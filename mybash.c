@@ -24,13 +24,8 @@ int main(int argc, char *argv[]) {
         /* Parseamos el pipeline */
         pipe = parse_pipeline(input);
 
-        /* Chequeamos que se haya parseado la completitud del comando */
+        /* Si estoy al final del archivo me voy */
         exit_bash = parser_at_eof(input);
-
-        /* Imprimo el comando. Esto despues se borra */    
-        char * pipe_str = pipeline_to_string(pipe);
-        printf("%s\n", pipe_str);
-        free(pipe_str); pipe_str = NULL;
 
         /* Ejecutamos el comando */
         execute_pipeline(pipe);
