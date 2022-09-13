@@ -28,41 +28,7 @@ static void free_argv(char **argv)
     argv = NULL;
 }
 
-/* Ejecuta un comando simple identificando si es interno o no*/
-static void execute_single_pipe(pipeline apipe)
-{
-    scommand cmd = pipeline_front(apipe);
-
-    /* Es comando interno */
-    if (builtin_is_internal(cmd))
-    {
-        builtin_run(cmd);
-    }
-
-    /* No es comando interno */
-    else
-    {
-        char **argv = scommand_to_vector(cmd);
-
-        int pid = fork();
-        if (pid < 0)
-        { /* No funcionó bien el fork */
-            fprintf(stderr, "Error fork.");
-            exit(EXIT_FAILURE);
-        }
-        else if (pid == 0)
-        { /* Ejecuta el hijo */
-            execvp(argv[0], argv);
-        }
-        else if (pid > 0 && pipeline_get_wait(apipe))
-        { /* Proc padre. No contiene &, debe esperar al hijo */
-            wait(NULL);
-        }
-
-        free_argv(argv);
-    }
-}
-
+/* Se encarga de redireccionar la entrada de cmd */
 static int set_fd_in(scommand cmd)
 {
     int redirected_in = 0;
@@ -93,6 +59,7 @@ static int set_fd_in(scommand cmd)
     return (EXIT_SUCCESS);
 }
 
+/* Se encarga de redireccionar la salida de cmd */
 static int set_fd_out(scommand cmd)
 {
     int redirected_out = 0;
@@ -125,6 +92,54 @@ static int set_fd_out(scommand cmd)
     return (EXIT_SUCCESS);
 }
 
+/* Ejecuta un comando simple identificando si es interno o no*/
+static void execute_single_pipe(pipeline apipe)
+{
+    scommand cmd = pipeline_front(apipe);
+
+    /* Es comando interno */
+    if (builtin_is_internal(cmd))
+    {
+        builtin_run(cmd);
+    }
+
+    /* No es comando interno */
+    else
+    {
+        char **argv = scommand_to_vector(cmd);
+
+        int pid = fork();
+        if (pid < 0)
+        { /* No funcionó bien el fork */
+            fprintf(stderr, "Error fork.");
+            exit(EXIT_FAILURE);
+        }
+        else if (pid == 0)
+        { /* Ejecuta el hijo */
+            int status = set_fd_in(cmd);
+            if (status != 0)
+            {
+                fprintf(stderr, "error setting file descriptors");
+                exit(EXIT_FAILURE);
+            }
+            status = set_fd_out(cmd);
+            if (status != 0)
+            {
+                fprintf(stderr, "error setting file descriptors");
+                exit(EXIT_FAILURE);
+            }
+            execvp(argv[0], argv);
+        }
+        else if (pid > 0 && pipeline_get_wait(apipe))
+        { /* Proc padre. No contiene &, debe esperar al hijo */
+            wait(NULL);
+        }
+
+        free_argv(argv);
+    }
+}
+
+/* Se encarga de ejecutar un comando externo sin forkear */
 static void execute_external_cmd(scommand cmd)
 {
     int status = set_fd_in(cmd);

@@ -55,7 +55,7 @@ static void builtin_run_exit (scommand cmd){
 static void builtin_run_help (scommand cmd){
     printf("Bienvenido a MyBash\n");
     printf("Autores: Mateo Malpassi, Mario Picasso, Facundo Coria, Bruno Espinossa\n");
-    printf("Comandos internos disponibles: \n cd (Cambia del directorio actual al cual desees) \n exit (Salir del bash) help (Obtén información sobre el bash y los comandos que este tiene implementados)\n");   
+    printf("Comandos internos disponibles: \n cd (Cambiar del directorio actual al cual desees) \n exit (Salir del bash) \n help (Obtén información sobre el bash y los comandos que este tiene implementados)\n");   
 }
 
 void builtin_run(scommand cmd){
