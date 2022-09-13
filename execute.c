@@ -15,61 +15,6 @@
 #define WRITE_END 1 /* index pipe extremo escritura */
 
 /* Funciones auxiliares */
-static int set_fd_in(scommand cmd){
-
-    int redirected_in = 0;
-    if(scommand_get_redir_in(cmd) != NULL){
-
-        int file_to_redirect_in = open(scommand_get_redir_in(cmd), O_RDONLY);
-        if (file_to_redirect_in == -1) {
-            // En caso de error, open seetea el mansaje de perror
-            perror(scommand_get_redir_in(cmd));
-            return (EXIT_FAILURE);
-        }
-        
-        redirected_in = dup2(file_to_redirect_in, STDIN_FILENO);
-        if(redirected_in == -1){
-            perror(scommand_get_redir_in(cmd));
-            return(EXIT_FAILURE);
-        }
-
-        int close_file = close(file_to_redirect_in);
-        if(close_file == -1){
-            perror("dup2");
-            return(EXIT_FAILURE);
-        }
-    }
-    //Si redirected_in == 0 -> No hay redirección de entrada
-    return (EXIT_SUCCESS);
-}
-
-static int set_fd_out(scommand cmd){
-
-    int redirected_out = 0;
-    if(scommand_get_redir_out(cmd) != NULL){
-        //O_CREAT para crear el archivo de salida si este no existe
-        int file_to_redirect_out = open(scommand_get_redir_out(cmd), O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR);
-        if (file_to_redirect_out == -1) {
-            // En caso de error, open seetea el mansaje de perror
-            perror(scommand_get_redir_in(cmd));
-            return (EXIT_FAILURE);
-        }
-        
-        redirected_out = dup2(file_to_redirect_out, STDOUT_FILENO);
-        if(redirected_out == -1){
-            perror(scommand_get_redir_in(cmd));
-            return(EXIT_FAILURE);
-        }
-
-        int close_file = close(file_to_redirect_out);
-        if(close_file == -1){
-            perror("dup2");
-            return(EXIT_FAILURE);
-        }
-    }
-    //Si redirected_out == 0 -> No hay redirección de salida
-    return (EXIT_SUCCESS);
-}
 
 /* Liberar memoria de argv */
 static void free_argv(char **argv)
@@ -101,16 +46,16 @@ static void execute_single_pipe(pipeline apipe)
 
         int pid = fork();
         if (pid < 0)
-        {   /* No funcionó bien el fork */
+        { /* No funcionó bien el fork */
             fprintf(stderr, "Error fork.");
             exit(EXIT_FAILURE);
         }
         else if (pid == 0)
-        {   /* Ejecuta el hijo */
+        { /* Ejecuta el hijo */
             execvp(argv[0], argv);
         }
         else if (pid > 0 && pipeline_get_wait(apipe))
-        {   /* Proc padre. No contiene &, debe esperar al hijo */
+        { /* Proc padre. No contiene &, debe esperar al hijo */
             wait(NULL);
         }
 
@@ -118,12 +63,95 @@ static void execute_single_pipe(pipeline apipe)
     }
 }
 
+static int set_fd_in(scommand cmd)
+{
+
+    int redirected_in = 0;
+    if (scommand_get_redir_in(cmd) != NULL)
+    {
+
+        int file_to_redirect_in = open(scommand_get_redir_in(cmd), O_DIRECTORY, O_RDONLY);
+        if (file_to_redirect_in == -1)
+        {
+            // En caso de error, open seetea el mansaje de perror
+            perror(scommand_get_redir_in(cmd));
+            return (EXIT_FAILURE);
+        }
+
+        redirected_in = dup2(file_to_redirect_in, STDIN_FILENO);
+        if (redirected_in == -1)
+        {
+            perror(scommand_get_redir_in(cmd));
+            return (EXIT_FAILURE);
+        }
+
+        int close_file = close(file_to_redirect_in);
+        if (close_file == -1)
+        {
+            perror("dup2");
+            return (EXIT_FAILURE);
+        }
+    }
+    // Si redirected_in == 0 -> No hay redirección de entrada
+    return (EXIT_SUCCESS);
+}
+
+static int set_fd_out(scommand cmd)
+{
+    int redirected_out = 0;
+    if (scommand_get_redir_out(cmd) != NULL)
+    {
+        // O_CREAT para crear el archivo de salida si este no existe
+        int file_to_redirect_out = open(scommand_get_redir_out(cmd), O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR);
+        if (file_to_redirect_out == -1)
+        {
+            // En caso de error, open seetea el mansaje de perror
+            perror(scommand_get_redir_in(cmd));
+            return (EXIT_FAILURE);
+        }
+
+        redirected_out = dup2(file_to_redirect_out, STDOUT_FILENO);
+        if (redirected_out == -1)
+        {
+            perror(scommand_get_redir_in(cmd));
+            return (EXIT_FAILURE);
+        }
+
+        int close_file = close(file_to_redirect_out);
+        if (close_file == -1)
+        {
+            perror("dup2");
+            return (EXIT_FAILURE);
+        }
+    }
+    // Si redirected_out == 0 -> No hay redirección de salida
+    return (EXIT_SUCCESS);
+}
+
+static void execute_external_cmd(scommand cmd)
+{
+    int status = set_fd_in(cmd);
+    if (status != 0)
+    {
+        fprintf(stderr, "error setting file descriptors");
+        exit(EXIT_FAILURE);
+    }
+    status = set_fd_out(cmd);
+    if (status != 0)
+    {
+        fprintf(stderr, "error setting file descriptors");
+        exit(EXIT_FAILURE);
+    }
+    char **argv = scommand_to_vector(cmd);
+    execvp(argv[0], argv);
+    free_argv(argv);
+}
+
 /* Ejecuta dos comandos unidos por un pipe identificando si son internos o no */
 
 static void execute_double_pipe(pipeline apipe)
 {
     scommand cmd1 = pipeline_front(apipe); /* 1er comando */
-    scommand cmd2 = NULL;                  /* 2do comando */
 
     int fd[2]; /* file descriptor */
     pipe(fd);  /* pipe que conecta la salida de cmd1 con la entrada del cmd2, fd con extremos abiertos */
@@ -131,12 +159,12 @@ static void execute_double_pipe(pipeline apipe)
     int pid = fork(); /* Hijos heredan extremos de escritura y lectura abiertos */
 
     if (pid < 0)
-    {   /* No funcionó bien el fork */
+    { /* No funcionó bien el fork */
         fprintf(stderr, "Error fork.");
         exit(EXIT_FAILURE);
     }
     else if (pid == 0)
-    {   /* Hijo 1 */
+    { /* Hijo 1 */
         close(fd[READ_END]);
 
         dup2(fd[WRITE_END], STDOUT_FILENO);
@@ -149,13 +177,11 @@ static void execute_double_pipe(pipeline apipe)
         }
         else
         {
-            char **argv = scommand_to_vector(cmd1);
-            execvp(argv[0], argv);
-            free_argv(argv);
+            execute_external_cmd(cmd1);
         }
     }
     else if (pid > 0)
-    {   /* Proc padre */
+    { /* Proc padre */
         close(fd[WRITE_END]);
         pid = fork();
 
@@ -165,25 +191,24 @@ static void execute_double_pipe(pipeline apipe)
             exit(EXIT_FAILURE);
         }
         else if (pid == 0)
-        {   /* Hijo 2 */
+        { /* Hijo 2 */
             pipeline_pop_front(apipe);
-            cmd2 = pipeline_front(apipe);
+            scommand cmd2 = pipeline_front(apipe);
 
             dup2(fd[READ_END], STDIN_FILENO);
             close(fd[READ_END]);
 
-
-            if (builtin_is_internal(cmd1))
+            if (builtin_is_internal(cmd2))
             {
-            builtin_run(cmd1);
-            pipeline_pop_front(apipe);
+                builtin_run(cmd2);
+                pipeline_pop_front(apipe);
             }
-            char **argv = scommand_to_vector(cmd2);
-            execvp(argv[0], argv);
-            free_argv(argv);
+            else {
+                execute_external_cmd(cmd2);
+            }
         }
         else if (pid > 0 && pipeline_get_wait(apipe))
-        {   /* Proc padre. Sin &, debe esperar a los hijos */
+        { /* Proc padre. Sin &, debe esperar a los hijos */
             wait(NULL);
             wait(NULL);
         }
