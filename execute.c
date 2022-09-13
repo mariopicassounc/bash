@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
-
+#include <fcntl.h>
 #include "tests/syscall_mock.h"
 
 #include "execute.h"
@@ -14,6 +14,63 @@
 #define READ_END    0    /* index pipe extremo lectura */
 #define WRITE_END   1    /* index pipe extremo escritura */
 
+
+
+static int set_fd_in(scommand cmd){
+
+    int redirected_in = 0;
+    if(scommand_get_redir_in(cmd) != NULL){
+
+        int file_to_redirect_in = open(scommand_get_redir_in(cmd), O_RDONLY | O_CREAT, S_IRUSR | S_IWUSR);
+        if (file_to_redirect_in == -1) {
+            // En caso de error, open seetea el mansaje de perror
+            perror(scommand_get_redir_in(cmd));
+            return (EXIT_FAILURE);
+        }
+        
+        redirected_in = dup2(file_to_redirect_in, STDIN_FILENO);
+        if(redirected_in == -1){
+            perror(scommand_get_redir_in(cmd));
+            return(EXIT_FAILURE);
+        }
+
+        int close_file = close(file_to_redirect_in);
+        if(close_file == -1){
+            perror("dup2");
+            return(EXIT_FAILURE);
+        }
+    }
+    //Si redirected_in == 0 -> No hay redirección de entrada
+    return (EXIT_SUCCESS);
+}
+
+static int set_fd_out(scommand cmd){
+
+    int redirected_out = 0;
+    if(scommand_get_redir_out(cmd) != NULL){
+        //O_CREAT para crear el archivo de salida si este no existe
+        int file_to_redirect_out = open(scommand_get_redir_out(cmd), O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR);
+        if (file_to_redirect_out == -1) {
+            // En caso de error, open seetea el mansaje de perror
+            perror(scommand_get_redir_in(cmd));
+            return (EXIT_FAILURE);
+        }
+        
+        redirected_out = dup2(file_to_redirect_out, STDOUT_FILENO);
+        if(redirected_out == -1){
+            perror(scommand_get_redir_in(cmd));
+            return(EXIT_FAILURE);
+        }
+
+        int close_file = close(file_to_redirect_out);
+        if(close_file == -1){
+            perror("dup2");
+            return(EXIT_FAILURE);
+        }
+    }
+    //Si redirected_out == 0 -> No hay redirección de salida
+    return (EXIT_SUCCESS);
+}
 /*
 Ejecuta un comando simple identificando si es interno o no
 */
@@ -36,6 +93,8 @@ static void execute_scommand(pipeline apipe){
             exit(EXIT_FAILURE);	
         }
         else if(pid == 0){	//Ejecuta el hijo
+            set_fd_in(cmd);
+            set_fd_out(cmd);
             execvp(argv[0],argv);
         }
         else if(pid > 0 && pipeline_get_wait(apipe)){ //Proc padre. No contiene &, debe esperar al hijo
@@ -94,7 +153,8 @@ void execute_pipeline(pipeline apipe){
                 close(fd[READ_END]); 
 
                 dup2(fd[WRITE_END], STDOUT_FILENO); 
-                close(fd[WRITE_END]);   
+                close(fd[WRITE_END]);
+                set_fd_in(cmd1);   
 
                 char **argv = scommand_to_vector(cmd1);
                 execvp(argv[0], argv);
@@ -113,6 +173,7 @@ void execute_pipeline(pipeline apipe){
 
                     dup2(fd[READ_END], STDIN_FILENO);
                     close(fd[READ_END]);
+                    set_fd_out(cmd2);
 
                     char **argv = scommand_to_vector(cmd2); 
                     execvp(argv[0], argv);
