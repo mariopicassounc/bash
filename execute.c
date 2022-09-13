@@ -65,11 +65,9 @@ static void execute_single_pipe(pipeline apipe)
 
 static int set_fd_in(scommand cmd)
 {
-
     int redirected_in = 0;
     if (scommand_get_redir_in(cmd) != NULL)
     {
-
         int file_to_redirect_in = open(scommand_get_redir_in(cmd), O_DIRECTORY, O_RDONLY);
         if (file_to_redirect_in == -1)
         {
@@ -84,7 +82,6 @@ static int set_fd_in(scommand cmd)
             perror(scommand_get_redir_in(cmd));
             return (EXIT_FAILURE);
         }
-
         int close_file = close(file_to_redirect_in);
         if (close_file == -1)
         {

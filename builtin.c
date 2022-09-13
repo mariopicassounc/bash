@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include "tests/syscall_mock.h"
 
 #include "builtin.h"
 #include "command.h"
@@ -36,8 +37,7 @@ static void builtin_run_cd (scommand cmd){
     const char* cmd_path = scommand_front(cmd);
     int result = chdir(cmd_path);
     if(result != 0){
-        fprintf(stderr, "invalid result");
-        exit(EXIT_FAILURE);
+        fprintf(stderr, "invalid input");
     }
 }
 
