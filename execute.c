@@ -180,8 +180,9 @@ static void execute_double_pipe(pipeline apipe)
         close(fd[READ_END]);
 
         dup2(fd[WRITE_END], STDOUT_FILENO);
-        close(fd[WRITE_END]);
 
+        close(fd[WRITE_END]);
+        
         if (builtin_is_internal(cmd1))
         {
             builtin_run(cmd1);
@@ -191,6 +192,7 @@ static void execute_double_pipe(pipeline apipe)
         {
             execute_external_cmd(cmd1);
         }
+        
     }
     else if (pid > 0)
     { /* Proc padre */
@@ -203,7 +205,7 @@ static void execute_double_pipe(pipeline apipe)
             exit(EXIT_FAILURE);
         }
         else if (pid == 0)
-        { /* Hijo 2 */
+        {   /* Hijo 2 */
             pipeline_pop_front(apipe);
             scommand cmd2 = pipeline_front(apipe);
 
@@ -223,6 +225,7 @@ static void execute_double_pipe(pipeline apipe)
         { /* Proc padre. Sin &, debe esperar a los hijos */
             wait(NULL);
             wait(NULL);
+            close(fd[READ_END]);
         }
     }
 }
