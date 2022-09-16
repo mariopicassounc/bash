@@ -37,25 +37,26 @@ static int set_fd_in(scommand cmd)
         int file_to_redirect_in = open(scommand_get_redir_in(cmd), O_DIRECTORY, O_RDONLY);
         if (file_to_redirect_in == -1)
         {
-            // En caso de error, open seetea el mansaje de perror
-            perror(scommand_get_redir_in(cmd));
-            return (EXIT_FAILURE);
+            /* En caso de error, open seetea el mansaje de perror */
+            fprintf(stderr, "open error");
+            exit(EXIT_FAILURE);
         }
 
         redirected_in = dup2(file_to_redirect_in, STDIN_FILENO);
         if (redirected_in == -1)
         {
-            perror(scommand_get_redir_in(cmd));
-            return (EXIT_FAILURE);
+            fprintf(stderr, "dup2 error");
+            exit(EXIT_FAILURE);
         }
+
         int close_file = close(file_to_redirect_in);
-        if (close_file == -1)
+        if(close_file == -1)
         {
-            perror("dup2");
-            return (EXIT_FAILURE);
+            fprintf(stderr, "close error");
+            exit(EXIT_FAILURE);
         }
     }
-    // Si redirected_in == 0 -> No hay redirección de entrada
+    /* Si redirected_in == 0 -> No hay redirección de entrada */
     return (EXIT_SUCCESS);
 }
 
@@ -70,22 +71,22 @@ static int set_fd_out(scommand cmd)
         if (file_to_redirect_out == -1)
         {
             // En caso de error, open seetea el mansaje de perror
-            perror(scommand_get_redir_in(cmd));
-            return (EXIT_FAILURE);
+            fprintf(stderr, "open error");
+            exit(EXIT_FAILURE);
         }
 
         redirected_out = dup2(file_to_redirect_out, STDOUT_FILENO);
         if (redirected_out == -1)
         {
-            perror(scommand_get_redir_in(cmd));
-            return (EXIT_FAILURE);
+            fprintf(stderr, "dup2 error");
+            exit(EXIT_FAILURE);
         }
 
         int close_file = close(file_to_redirect_out);
         if (close_file == -1)
         {
-            perror("dup2");
-            return (EXIT_FAILURE);
+            fprintf(stderr, "close error");
+            exit(EXIT_FAILURE);
         }
     }
     // Si redirected_out == 0 -> No hay redirección de salida
