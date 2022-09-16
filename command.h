@@ -131,22 +131,21 @@ char * scommand_to_string(const scommand self);
  *   strlen(result)>0
  */
 
-
-
-/*
- * Funciones auxiliares
- */
+/* Funciones auxiliares */
 
 char* scommand_front_and_pop(scommand self);
 /*
-Obtiene el primer elemento del scommand y elimina el nodo del TAD pero 
-no elimina el string en memoria dinámica
+* Obtiene el primer elemento del scommand y elimina el nodo del TAD pero 
+* no elimina el string en memoria dinámica
 */
 
-
 char ** scommand_to_vector(scommand self);
-//Crea un vector cuyos elementos son el comando y los argumentos de un scommand
+/* 
+* Crea un vector cuyos elementos son el comando 
+* y los argumentos de un scommand 
+*/
 
+/*   ---  pipeline  ---   */
 
 /*
  * pipeline: tubería de comandos.

@@ -17,7 +17,7 @@ bool builtin_is_internal(scommand cmd){
            strcmp(scommand_front(cmd), "exit") == 0 ||
            strcmp(scommand_front(cmd), "help") == 0
            ;
-} //strcmp devuelve 0 si las cadenas a comparar son iguales
+} /* strcmp devuelve 0 si las cadenas a comparar son iguales */
 
 bool builtin_alone(pipeline p){
     assert(p != NULL);
@@ -28,8 +28,9 @@ bool builtin_alone(pipeline p){
 
 /*Funciones auxiliares*/
 
-/*Ejecuta el comando "cd"
-  Requires: cmd != NULL* && strcmp(scommand_front(cmd), "cd") == 0
+/*
+* Ejecuta el comando "cd"
+* Requires: cmd != NULL* && strcmp(scommand_front(cmd), "cd") == 0
 */
 static void builtin_run_cd (scommand cmd){
     assert(cmd != NULL && strcmp(scommand_front(cmd), "cd") == 0);
@@ -41,16 +42,18 @@ static void builtin_run_cd (scommand cmd){
     }
 }
 
-/*Ejecuta el comando "exit"
-  Requires: cmd != NULL && strcmp(scommand_front(cmd), "exit") == 0
+/*
+* Ejecuta el comando "exit"
+* Requires: cmd != NULL && strcmp(scommand_front(cmd), "exit") == 0
 */
 static void builtin_run_exit (scommand cmd){
     assert(cmd != NULL && strcmp(scommand_front(cmd), "exit") == 0);
     exit_bash = true;
 }
 
-/*Ejecuta el comando "help"
-  Requires: cmd != NULL && strcmp(scommand_front(cmd), "help") == 0
+/*
+* Ejecuta el comando "help"
+* Requires: cmd != NULL && strcmp(scommand_front(cmd), "help") == 0
 */
 static void builtin_run_help (scommand cmd){
     printf("Bienvenido a MyBash\n");

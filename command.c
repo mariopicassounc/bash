@@ -52,7 +52,8 @@ scommand scommand_destroy(scommand self){
 
 void scommand_push_back(scommand self, char * argument){
     assert(self!=NULL && argument!=NULL);
-    self->cmd_args = g_slist_append(self->cmd_args, argument); /*Esto anda si el argumento es un puntero de 64 bits y el gpointer también*/
+    /* Esto anda si el argumento es un puntero de 64 bits y el gpointer también */
+    self->cmd_args = g_slist_append(self->cmd_args, argument);
     assert(!scommand_is_empty(self));
 }
 
@@ -71,7 +72,7 @@ void scommand_pop_front(scommand self){
 void scommand_set_redir_in(scommand self, char * filename){
     assert(self != NULL);
     
-    /* Free past redirectors dynamic string */
+    /* Libera las redirecciones */
     if(self->redirect_in){
         free(self->redirect_in);
     }
@@ -163,8 +164,6 @@ char * scommand_front_and_pop(scommand self){
     return (result);
 }
 
-
-
 char ** scommand_to_vector(scommand self){ 
     assert(!scommand_is_empty(self));
     
@@ -188,7 +187,6 @@ char ** scommand_to_vector(scommand self){
 }
 
 /*   ---  pipeline  ---   */
-
 
 typedef struct pipeline_s{
     GSList * list_sc;
