@@ -129,7 +129,10 @@ static void execute_single_pipe(pipeline apipe)
                 fprintf(stderr, "error setting file descriptors");
                 exit(EXIT_FAILURE);
             }
-            execvp(argv[0], argv);
+            int rvalue = execvp(argv[0], argv);
+            if(rvalue == -1){
+                printf("Error: Wrong command\n");
+            }
         }
         else if (pid > 0 && pipeline_get_wait(apipe))
         { /* Proc padre. No contiene &, debe esperar al hijo */
@@ -143,6 +146,7 @@ static void execute_single_pipe(pipeline apipe)
 /* Se encarga de ejecutar un comando externo sin forkear */
 static void execute_external_cmd(scommand cmd)
 {
+    int rvalue = 0;
     int status = set_fd_in(cmd);
     if (status != 0)
     {
@@ -156,7 +160,10 @@ static void execute_external_cmd(scommand cmd)
         exit(EXIT_FAILURE);
     }
     char **argv = scommand_to_vector(cmd);
-    execvp(argv[0], argv);
+    rvalue = execvp(argv[0], argv);
+    if(rvalue == -1){
+        printf("Error: Wrong command\n");
+    }
     free_argv(argv);
 }
 

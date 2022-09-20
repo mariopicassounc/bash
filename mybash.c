@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <sys/wait.h>
 
 #include "command.h"
 #include "execute.h"
@@ -21,6 +22,10 @@ int main(int argc, char *argv[]) {
     input = parser_new(stdin);
     while (!exit_bash) {
         show_prompt();
+
+        /* Aseguramos matar los procesos zombies (en caso de que haya) */
+        while(waitpid(-1,NULL,WNOHANG) > 0);
+
         /* Parseamos el pipeline */
         pipe = parse_pipeline(input);
 
