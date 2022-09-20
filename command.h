@@ -9,7 +9,6 @@
 
 #include <stdbool.h> /* para tener bool */
 
-
 /* scommand: comando simple.
  * Ejemplo: ls -l ej1.c > out < in
  * Se presenta como una secuencia de cadenas donde la primera se denomina
@@ -30,9 +29,9 @@
  * agrega dos accesores/modificadores para redirección de entrada y salida.
  */
 
-typedef struct scommand_s * scommand;
+typedef struct scommand_s *scommand;
 
-scommand scommand_new(void);
+scommand scommand_new (void);
 /*
  * Nuevo `scommand', sin comandos o argumentos y los redirectores vacíos
  *   Returns: nuevo comando simple sin ninguna cadena y redirectores vacíos.
@@ -41,7 +40,7 @@ scommand scommand_new(void);
  *  scommand_get_redir_out (result) == NULL
  */
 
-scommand scommand_destroy(scommand self);
+scommand scommand_destroy (scommand self);
 /*
  * Destruye `self'.
  *   self: comando simple a destruir.
@@ -51,7 +50,7 @@ scommand scommand_destroy(scommand self);
 
 /* Modificadores */
 
-void scommand_push_back(scommand self, char * argument);
+void scommand_push_back (scommand self, char *argument);
 /*
  * Agrega por detrás una cadena a la secuencia de cadenas.
  *   self: comando simple al cual agregarle la cadena.
@@ -60,26 +59,26 @@ void scommand_push_back(scommand self, char * argument);
  * Ensures: !scommand_is_empty()
  */
 
-void scommand_pop_front(scommand self);
+void scommand_pop_front (scommand self);
 /*
  * Quita la cadena de adelante de la secuencia de cadenas.
  *   self: comando simple al cual sacarle la cadena del frente.
  * Requires: self!=NULL && !scommand_is_empty(self)
  */
 
-void scommand_set_redir_in(scommand self, char * filename);
-void scommand_set_redir_out(scommand self, char * filename);
+void scommand_set_redir_in (scommand self, char *filename);
+void scommand_set_redir_out (scommand self, char *filename);
 /*
  * Define la redirección de entrada (salida).
- *   self: comando simple al cual establecer la redirección de entrada (salida).
- *   filename: cadena con el nombre del archivo de la redirección
- *     o NULL si no se quiere redirección. El TAD se apropia de la referencia.
+ *   self: comando simple al cual establecer la redirección de entrada
+ * (salida). filename: cadena con el nombre del archivo de la redirección o
+ * NULL si no se quiere redirección. El TAD se apropia de la referencia.
  * Requires: self!=NULL
  */
 
 /* Proyectores */
 
-bool scommand_is_empty(const scommand self);
+bool scommand_is_empty (const scommand self);
 /*
  * Indica si la secuencia de cadenas tiene longitud 0.
  *   self: comando simple a decidir si está vacío.
@@ -87,7 +86,7 @@ bool scommand_is_empty(const scommand self);
  * Requires: self!=NULL
  */
 
-unsigned int scommand_length(const scommand self);
+unsigned int scommand_length (const scommand self);
 /*
  * Da la longitud de la secuencia cadenas que contiene el comando simple.
  *   self: comando simple a medir.
@@ -97,7 +96,7 @@ unsigned int scommand_length(const scommand self);
  *
  */
 
-char * scommand_front(const scommand self);
+char *scommand_front (const scommand self);
 /*
  * Toma la cadena de adelante de la secuencia de cadenas.
  *   self: comando simple al cual tomarle la cadena del frente.
@@ -108,8 +107,8 @@ char * scommand_front(const scommand self);
  * Ensures: result!=NULL
  */
 
-char * scommand_get_redir_in(const scommand self);
-char * scommand_get_redir_out(const scommand self);
+char *scommand_get_redir_in (const scommand self);
+char *scommand_get_redir_out (const scommand self);
 /*
  * Obtiene los nombres de archivos a donde redirigir la entrada (salida).
  *   self: comando simple a decidir si está vacío.
@@ -118,7 +117,7 @@ char * scommand_get_redir_out(const scommand self);
  * Requires: self!=NULL
  */
 
-char * scommand_to_string(const scommand self);
+char *scommand_to_string (const scommand self);
 /* Preety printer para hacer debugging/logging.
  * Genera una representación del comando simple en un string (aka "serializar")
  *   self: comando simple a convertir.
@@ -133,17 +132,17 @@ char * scommand_to_string(const scommand self);
 
 /* Funciones auxiliares */
 
-char* scommand_front_and_pop(scommand self);
+char *scommand_front_and_pop (scommand self);
 /*
-* Obtiene el primer elemento del scommand y elimina el nodo del TAD pero 
-* no elimina el string en memoria dinámica
-*/
+ * Obtiene el primer elemento del scommand y elimina el nodo del TAD pero
+ * no elimina el string en memoria dinámica
+ */
 
-char ** scommand_to_vector(scommand self);
-/* 
-* Crea un vector cuyos elementos son el comando 
-* y los argumentos de un scommand 
-*/
+char **scommand_to_vector (scommand self);
+/*
+ * Crea un vector cuyos elementos son el comando
+ * y los argumentos de un scommand
+ */
 
 /*   ---  pipeline  ---   */
 
@@ -165,9 +164,9 @@ char ** scommand_to_vector(scommand self);
  *           ------------------------------
  */
 
-typedef struct pipeline_s * pipeline;
+typedef struct pipeline_s *pipeline;
 
-pipeline pipeline_new(void);
+pipeline pipeline_new (void);
 /*
  * Nuevo `pipeline', sin comandos simples y establecido para que espere.
  *   Returns: nuevo pipeline sin comandos simples y que espera.
@@ -176,7 +175,7 @@ pipeline pipeline_new(void);
  *  && pipeline_get_wait(result)
  */
 
-pipeline pipeline_destroy(pipeline self);
+pipeline pipeline_destroy (pipeline self);
 /*
  * Destruye `self'.
  *   self: tubería a a destruir.
@@ -186,7 +185,7 @@ pipeline pipeline_destroy(pipeline self);
 
 /* Modificadores */
 
-void pipeline_push_back(pipeline self, scommand sc);
+void pipeline_push_back (pipeline self, scommand sc);
 /*
  * Agrega por detrás un comando simple a la secuencia.
  *   self: pipeline al cual agregarle el comando simple.
@@ -195,7 +194,7 @@ void pipeline_push_back(pipeline self, scommand sc);
  * Ensures: !pipeline_is_empty()
  */
 
-void pipeline_pop_front(pipeline self);
+void pipeline_pop_front (pipeline self);
 /*
  * Quita el comando simple de adelante de la secuencia.
  *   self: pipeline al cual sacarle el comando simple del frente.
@@ -203,7 +202,7 @@ void pipeline_pop_front(pipeline self);
  * Requires: self!=NULL && !pipeline_is_empty(self)
  */
 
-void pipeline_set_wait(pipeline self, const bool w);
+void pipeline_set_wait (pipeline self, const bool w);
 /*
  * Define si el pipeline tiene que esperar o no.
  *   self: pipeline que quiere ser establecido en su atributo de espera.
@@ -212,7 +211,7 @@ void pipeline_set_wait(pipeline self, const bool w);
 
 /* Proyectores */
 
-bool pipeline_is_empty(const pipeline self);
+bool pipeline_is_empty (const pipeline self);
 /*
  * Indica si la secuencia de comandos simples tiene longitud 0.
  *   self: pipeline a decidir si está vacío.
@@ -220,7 +219,7 @@ bool pipeline_is_empty(const pipeline self);
  * Requires: self!=NULL
  */
 
-unsigned int pipeline_length(const pipeline self);
+unsigned int pipeline_length (const pipeline self);
 /*
  * Da la longitud de la secuencia de comandos simples.
  *   self: pipeline a medir.
@@ -230,7 +229,7 @@ unsigned int pipeline_length(const pipeline self);
  *
  */
 
-scommand pipeline_front(const pipeline self);
+scommand pipeline_front (const pipeline self);
 /*
  * Devuelve el comando simple de adelante de la secuencia.
  *   self: pipeline al cual consultar cual es el comando simple del frente.
@@ -242,7 +241,7 @@ scommand pipeline_front(const pipeline self);
  * Ensures: result!=NULL
  */
 
-bool pipeline_get_wait(const pipeline self);
+bool pipeline_get_wait (const pipeline self);
 /*
  * Consulta si el pipeline tiene que esperar o no.
  *   self: pipeline a decidir si hay que esperar.
@@ -250,14 +249,15 @@ bool pipeline_get_wait(const pipeline self);
  * Requires: self!=NULL
  */
 
-char * pipeline_to_string(const pipeline self);
+char *pipeline_to_string (const pipeline self);
 /* Pretty printer para hacer debugging/logging.
  * Genera una representación del pipeline en una cadena (aka "serializar").
  *   self: pipeline a convertir.
  *   Returns: una cadena con la representación del pipeline similar
  *     a lo que se escribe en un shell. Debe destruirla el llamador.
  * Requires: self!=NULL
- * Ensures: pipeline_is_empty(self) || pipeline_get_wait(self) || strlen(result)>0
+ * Ensures: pipeline_is_empty(self) || pipeline_get_wait(self) ||
+ * strlen(result)>0
  */
 
 #endif /* COMMAND_H */

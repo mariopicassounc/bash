@@ -5,8 +5,10 @@
 
 #include "command.h"
 
-extern bool exit_bash; //Variable auxiliar que se utilizará para entrar/salir del bash
-bool builtin_is_internal(scommand cmd);
+/* Variable auxiliar que se utilizará para entrar/salir del bash */
+extern bool exit_bash;
+
+bool builtin_is_internal (scommand cmd);
 /*
  * Indica si el comando alojado en `cmd` es un comando interno
  *
@@ -14,8 +16,7 @@ bool builtin_is_internal(scommand cmd);
  *
  */
 
-
-bool builtin_alone(pipeline p);
+bool builtin_alone (pipeline p);
 /*
  * Indica si el pipeline tiene solo un elemento y si este se corresponde a un
  * comando interno.
@@ -30,7 +31,7 @@ bool builtin_alone(pipeline p);
  *
  */
 
-void builtin_run(scommand cmd);
+void builtin_run (scommand cmd);
 /*
  * Ejecuta un comando interno
  *
@@ -39,4 +40,3 @@ void builtin_run(scommand cmd);
  */
 
 #endif
-

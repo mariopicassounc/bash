@@ -1,73 +1,94 @@
+#include "builtin.h"
+#include "command.h"
+#include "strextra.h"
+
+#include "tests/syscall_mock.h"
+
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "tests/syscall_mock.h"
-
-#include "builtin.h"
-#include "command.h"
-#include "strextra.h"
 
 bool exit_bash;
 
-bool builtin_is_internal(scommand cmd){
-    assert(cmd != NULL);
-    return strcmp(scommand_front(cmd), "cd") == 0 ||
-           strcmp(scommand_front(cmd), "exit") == 0 ||
-           strcmp(scommand_front(cmd), "help") == 0
-           ;
+bool
+builtin_is_internal (scommand cmd)
+{
+    assert (cmd != NULL);
+    return strcmp (scommand_front (cmd), "cd") == 0
+           || strcmp (scommand_front (cmd), "exit") == 0
+           || strcmp (scommand_front (cmd), "help") == 0;
 } /* strcmp devuelve 0 si las cadenas a comparar son iguales */
 
-bool builtin_alone(pipeline p){
-    assert(p != NULL);
-    return pipeline_length(p) == 1 &&
-           builtin_is_internal(pipeline_front(p))
-           ;
+bool
+builtin_alone (pipeline p)
+{
+    assert (p != NULL);
+    return pipeline_length (p) == 1
+           && builtin_is_internal (pipeline_front (p));
 }
 
 /*Funciones auxiliares*/
 
 /*
-* Ejecuta el comando "cd"
-* Requires: cmd != NULL* && strcmp(scommand_front(cmd), "cd") == 0
-*/
-static void builtin_run_cd (scommand cmd){
-    assert(cmd != NULL && strcmp(scommand_front(cmd), "cd") == 0);
-    scommand_pop_front(cmd);
-    const char* cmd_path = scommand_front(cmd);
-    int result = chdir(cmd_path);
-    if(result != 0){
-        fprintf(stderr, "invalid input");
-    }
+ * Ejecuta el comando "cd"
+ * Requires: cmd != NULL* && strcmp(scommand_front(cmd), "cd") == 0
+ */
+static void
+builtin_run_cd (scommand cmd)
+{
+    assert (cmd != NULL && strcmp (scommand_front (cmd), "cd") == 0);
+    scommand_pop_front (cmd);
+    const char *cmd_path = scommand_front (cmd);
+    int result = chdir (cmd_path);
+    if (result != 0)
+        {
+            fprintf (stderr, "invalid input");
+        }
 }
 
 /*
-* Ejecuta el comando "exit"
-* Requires: cmd != NULL && strcmp(scommand_front(cmd), "exit") == 0
-*/
-static void builtin_run_exit (scommand cmd){
-    assert(cmd != NULL && strcmp(scommand_front(cmd), "exit") == 0);
+ * Ejecuta el comando "exit"
+ * Requires: cmd != NULL && strcmp(scommand_front(cmd), "exit") == 0
+ */
+static void
+builtin_run_exit (scommand cmd)
+{
+    assert (cmd != NULL && strcmp (scommand_front (cmd), "exit") == 0);
     exit_bash = true;
 }
 
 /*
-* Ejecuta el comando "help"
-* Requires: cmd != NULL && strcmp(scommand_front(cmd), "help") == 0
-*/
-static void builtin_run_help (scommand cmd){
-    printf("Bienvenido a MyBash\n");
-    printf("Autores: Mateo Malpassi, Mario Picasso, Facundo Coria, Bruno Espinossa\n");
-    printf("Comandos internos disponibles: \n cd (Cambiar del directorio actual al cual desees) \n exit (Salir del bash) \n help (Obtén información sobre el bash y los comandos que este tiene implementados)\n");   
+ * Ejecuta el comando "help"
+ * Requires: cmd != NULL && strcmp(scommand_front(cmd), "help") == 0
+ */
+static void
+builtin_run_help (scommand cmd)
+{
+    printf ("Bienvenido a MyBash\n");
+    printf ("Autores: Mateo Malpassi, Mario Picasso, Facundo Coria, Bruno "
+            "Espinossa\n");
+    printf (
+        "Comandos internos disponibles: \n cd (Cambiar del directorio actual "
+        "al cual desees) \n exit (Salir del bash) \n help (Obtén información "
+        "sobre el bash y los comandos que este tiene implementados)\n");
 }
 
-void builtin_run(scommand cmd){
-    assert(builtin_is_internal(cmd));
-    if(strcmp(scommand_front(cmd), "cd") == 0){
-        builtin_run_cd(cmd);
-    }else if(strcmp(scommand_front(cmd), "exit") == 0){
-        builtin_run_exit(cmd);
-    }else if(strcmp(scommand_front(cmd), "help") == 0){
-        builtin_run_help(cmd);
-    }
+void
+builtin_run (scommand cmd)
+{
+    assert (builtin_is_internal (cmd));
+    if (strcmp (scommand_front (cmd), "cd") == 0)
+        {
+            builtin_run_cd (cmd);
+        }
+    else if (strcmp (scommand_front (cmd), "exit") == 0)
+        {
+            builtin_run_exit (cmd);
+        }
+    else if (strcmp (scommand_front (cmd), "help") == 0)
+        {
+            builtin_run_help (cmd);
+        }
 }
