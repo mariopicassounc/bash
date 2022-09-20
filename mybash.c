@@ -17,7 +17,7 @@ static void show_prompt(void) {
 int main(int argc, char *argv[]) {
     pipeline pipe;
     Parser input;
-    bool exit_bash = false;
+    exit_bash = false;
 
     input = parser_new(stdin);
     while (!exit_bash) {
@@ -31,6 +31,11 @@ int main(int argc, char *argv[]) {
 
         /* Si estoy al final del archivo me voy */
         exit_bash = parser_at_eof(input);
+
+        /* Si el usuario apreto enter sin contenido en el input, vuelvo a mostrar el prompt */
+        if (pipe == NULL){
+            continue;
+        }
 
         /* Ejecutamos el comando */
         execute_pipeline(pipe);

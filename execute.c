@@ -14,20 +14,6 @@
 #define READ_END 0  /* index pipe extremo lectura */
 #define WRITE_END 1 /* index pipe extremo escritura */
 
-/* Funciones auxiliares */
-
-/* Liberar memoria de argv */
-static void free_argv(char **argv)
-{
-    assert(argv != NULL);
-    for (int i = 0; argv[i] != NULL; i++)
-    {
-        free(argv[i]);
-    }
-    free(argv);
-    argv = NULL;
-}
-
 /* Se encarga de redireccionar la entrada de cmd */
 static int set_fd_in(scommand cmd)
 {
@@ -107,8 +93,6 @@ static void execute_single_pipe(pipeline apipe)
     /* No es comando interno */
     else
     {
-        char **argv = scommand_to_vector(cmd);
-
         int pid = fork();
         if (pid < 0)
         { /* No funcionó bien el fork */
@@ -118,53 +102,58 @@ static void execute_single_pipe(pipeline apipe)
         else if (pid == 0)
         { /* Ejecuta el hijo */
             int status = set_fd_in(cmd);
+            
+            /* La memoria de este array la libera el SO cuando el hijo termina */
+            char **argv = scommand_to_vector(cmd);
+            
             if (status != 0)
             {
                 fprintf(stderr, "error setting file descriptors");
                 exit(EXIT_FAILURE);
             }
             status = set_fd_out(cmd);
+            
             if (status != 0)
             {
                 fprintf(stderr, "error setting file descriptors");
                 exit(EXIT_FAILURE);
             }
-            int rvalue = execvp(argv[0], argv);
-            if(rvalue == -1){
-                printf("Error: Wrong command\n");
-            }
+            
+            execvp(argv[0], argv);
+            fprintf(stderr, "%s: No such file or directory\n", argv[0]);
+            exit(EXIT_FAILURE);
         }
         else if (pid > 0 && pipeline_get_wait(apipe))
         { /* Proc padre. No contiene &, debe esperar al hijo */
             wait(NULL);
         }
-
-        free_argv(argv);
     }
 }
 
 /* Se encarga de ejecutar un comando externo sin forkear */
 static void execute_external_cmd(scommand cmd)
 {
-    int rvalue = 0;
     int status = set_fd_in(cmd);
+    /* La memoria de este array la libera el SO cuando el hijo termina */
+    char **argv = scommand_to_vector(cmd);
+
     if (status != 0)
     {
         fprintf(stderr, "error setting file descriptors");
         exit(EXIT_FAILURE);
     }
+    
     status = set_fd_out(cmd);
     if (status != 0)
     {
         fprintf(stderr, "error setting file descriptors");
         exit(EXIT_FAILURE);
     }
-    char **argv = scommand_to_vector(cmd);
-    rvalue = execvp(argv[0], argv);
-    if(rvalue == -1){
-        printf("Error: Wrong command\n");
-    }
-    free_argv(argv);
+    
+    execvp(argv[0], argv);
+    
+    fprintf(stderr, "%s: No such file or directory\n", argv[0]);
+    exit(EXIT_FAILURE);
 }
 
 /* Ejecuta dos comandos unidos por un pipe identificando si son internos o no */
@@ -191,6 +180,7 @@ static void execute_double_pipe(pipeline apipe)
 
         close(fd[WRITE_END]);
         
+        /* Si es builtin se ejecuta dentro del hijo, comportamiento observado en bash */
         if (builtin_is_internal(cmd1))
         {
             builtin_run(cmd1);
@@ -219,7 +209,8 @@ static void execute_double_pipe(pipeline apipe)
 
             dup2(fd[READ_END], STDIN_FILENO);
             close(fd[READ_END]);
-
+            
+            /* Si es builtin se ejecuta dentro del hijo, comportamiento observado en bash */
             if (builtin_is_internal(cmd2))
             {
                 builtin_run(cmd2);
